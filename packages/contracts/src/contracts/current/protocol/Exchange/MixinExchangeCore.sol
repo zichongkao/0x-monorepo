@@ -101,7 +101,7 @@ contract MixinExchangeCore is
             //    0 == takerAssetAmount == filledAmount
             // Instead of distinguishing between unfilled and filled zero taker
             // amount orders, we choose not to support them.
-            if(order.takerAssetAmount == 0) {
+            if (order.takerAssetAmount == 0) {
                 status = uint8(Errors.ORDER_INVALID);
                 return;
             }
@@ -110,13 +110,13 @@ contract MixinExchangeCore is
             // While the Exchange contract handles them correctly, they create
             // edge cases in the supporting infrastructure because they have
             // an 'infinite' price when computed by a simple division.
-            if(order.makerAssetAmount == 0) {
+            if (order.makerAssetAmount == 0) {
                 status = uint8(Errors.ORDER_INVALID);
                 return;
             }
 
             // Maker signature needs to be valid
-            if(!isValidSignature(orderHash, order.makerAddress, signature)) {
+            if (!isValidSignature(orderHash, order.makerAddress, signature)) {
                 status = uint8(Errors.ORDER_SIGNATURE_INVALID);
                 return;
             }
@@ -248,8 +248,12 @@ contract MixinExchangeCore is
         uint8 status;
         uint256 filledAmount;
         (status, orderHash, filledAmount) = orderStatus(order, signature);
-        if(status != uint8(Errors.SUCCESS)) {
+        if (status != uint8(Errors.SUCCESS)) {
             emit ExchangeError(uint8(status), orderHash);
+            // If the order was invalid then throw an exception,
+            // otherwise gracefully return fill results.
+            require(Errors(status) != Errors.ORDER_INVALID);
+            require(Errors(status) != Errors.ORDER_SIGNATURE_INVALID);
             return fillResults;
         }
 
@@ -264,7 +268,7 @@ contract MixinExchangeCore is
             filledAmount,
             takerAssetFillAmount,
             msg.sender);
-        if(status != uint8(Errors.SUCCESS)) {
+        if (status != uint8(Errors.SUCCESS)) {
             emit ExchangeError(uint8(status), orderHash);
             return fillResults;
         }
