@@ -83,6 +83,7 @@ export enum ExchangeContractErrs {
     ERROR_ORDER_FULLY_FILLED,
     ERROR_ORDER_CANCELLED,
     ERROR_ROUNDING_ERROR_TOO_LARGE,
+    ERROR_INSUFFICIENT_BALANCE_OR_ALLOWANCE,
 }
 
 export enum ContractName {

@@ -107,9 +107,6 @@ describe('Exchange core', () => {
         defaultMakerAssetAddress = erc20TokenA.address;
         defaultTakerAssetAddress = erc20TokenB.address;
 
-        defaultMakerTokenAddress = rep.address;
-        defaultTakerTokenAddress = dgd.address;
-
         const defaultOrderParams = {
             ...constants.STATIC_ORDER_PARAMS,
             exchangeAddress: exchange.address,
@@ -490,7 +487,6 @@ describe('Exchange core', () => {
             signedOrder = orderFactory.newSignedOrder({
                 takerAssetAmount: new BigNumber(0),
             });
-            expect(res.logs).to.have.length(1);
 
             return expect(exchangeWrapper.fillOrderAsync(signedOrder, takerAddress)).to.be.rejectedWith(
                 constants.REVERT,
@@ -511,7 +507,6 @@ describe('Exchange core', () => {
             signedOrder = orderFactory.newSignedOrder({
                 makerAssetAmount: ZeroEx.toBaseUnitAmount(new BigNumber(100000), 18),
             });
-            expect(res.logs).to.have.length(1);
 
             return expect(exchangeWrapper.fillOrderAsync(signedOrder, takerAddress)).to.be.rejectedWith(
                 constants.REVERT,
