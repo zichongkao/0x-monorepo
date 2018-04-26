@@ -23,13 +23,25 @@ contract LibErrors {
 
     // Error Codes
     enum Errors {
-        ORDER_EXPIRED,                    // Order has already expired
-        ORDER_FULLY_FILLED,               // Order has already been fully filled
-        ORDER_CANCELLED,                  // Order has already been cancelled
-        ROUNDING_ERROR_TOO_LARGE,         // Rounding error too large
-        INSUFFICIENT_BALANCE_OR_ALLOWANCE // Insufficient balance or allowance for token transfer
+        INVALID,                           // The first (default) value is invalid
+        SUCCESS,                           // Operation executed normaly
+        ORDER_INVALID,                     // Order is invalid
+        ORDER_SIGNATURE_INVALID,           // Signature invalid
+        ORDER_SENDER_INVALID,              // Sender invalid
+        ORDER_EXPIRED,                     // Order has already expired
+        ORDER_FULLY_FILLED,                // Order has already been fully filled
+        ORDER_CANCELLED,                   // Order has already been cancelled
+        INVALID_TAKER,                     // Order can not be filled by taker
+        ROUNDING_ERROR_TOO_LARGE,          // Rounding error too large
+        INSUFFICIENT_BALANCE_OR_ALLOWANCE  // Insufficient balance or allowance for token transfer
     }
 
     event ExchangeError(uint8 indexed errorId, bytes32 indexed orderHash);
 
+    function isValidOrderStatus(Errors status) internal pure returns (bool) {
+        if (status == Errors.ORDER_INVALID) return false;
+        if (status == Errors.ORDER_SENDER_INVALID) return false;
+        if (status == Errors.ORDER_SIGNATURE_INVALID) return false;
+        return true;
+    }
 }

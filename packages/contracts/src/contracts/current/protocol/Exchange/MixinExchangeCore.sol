@@ -81,9 +81,154 @@ contract MixinExchangeCore is
     * Core exchange functions
     */
 
+    function orderStatus(
+        Order memory order,
+        bytes signature)
+        public
+        view
+        returns (
+            uint8 status,
+            bytes32 orderHash,
+            uint256 filledAmount)
+    {
+        // Compute the order hash and fetch filled amount
+        orderHash = getOrderHash(order);
+        filledAmount = filled[orderHash];
+
+        // Validations on order only if first time seen
+        if (filledAmount == 0) {
+
+            // If order.takerAssetAmount is zero, then the order will always
+            // be considered filled because:
+            //    0 == takerAssetAmount == filledAmount
+            // Instead of distinguishing between unfilled and filled zero taker
+            // amount orders, we choose not to support them.
+            if (order.takerAssetAmount == 0) {
+                status = uint8(Errors.ORDER_INVALID);
+                return;
+            }
+
+            // If order.makerAssetAmount is zero, we also reject the order.
+            // While the Exchange contract handles them correctly, they create
+            // edge cases in the supporting infrastructure because they have
+            // an 'infinite' price when computed by a simple division.
+            if (order.makerAssetAmount == 0) {
+                status = uint8(Errors.ORDER_INVALID);
+                return;
+            }
+
+            // Maker signature needs to be valid
+            if (!isValidSignature(orderHash, order.makerAddress, signature)) {
+                status = uint8(Errors.ORDER_SIGNATURE_INVALID);
+                return;
+            }
+        }
+
+        // Validate order expiration
+        if (block.timestamp >= order.expirationTimeSeconds) {
+            status = uint8(Errors.ORDER_EXPIRED);
+            return;
+        }
+
+        // Validate order availability
+        if (filledAmount >= order.takerAssetAmount) {
+            status = uint8(Errors.ORDER_FULLY_FILLED);
+            return;
+        }
+
+        // Check if order has been cancelled
+        if (cancelled[orderHash]) {
+            status = uint8(Errors.ORDER_CANCELLED);
+            return;
+        }
+
+        // Validate order is not cancelled
+        if (makerEpoch[order.makerAddress] > order.salt) {
+            status = uint8(Errors.ORDER_CANCELLED);
+            return;
+        }
+
+        // Validate sender is allowed to fill this order
+        if (order.senderAddress != address(0) && order.senderAddress != msg.sender) {
+            status = uint8(Errors.ORDER_SENDER_INVALID);
+            return;
+        }
+
+        // Order is OK
+        status = uint8(Errors.SUCCESS);
+        return;
+    }
+
+    function getFillAmounts(
+        Order memory order,
+        uint256 filledAmount,
+        uint256 takerAssetFillAmount,
+        address takerAddress)
+        public
+        pure
+        returns (
+            uint8 status,
+            FillResults memory fillResults)
+    {
+        // Validate taker is allowed to fill this order
+        if (order.takerAddress != address(0)) {
+            require(order.takerAddress == takerAddress);
+        }
+        require(takerAssetFillAmount > 0);
+
+        // Compute takerAssetFilledAmount
+        uint256 remainingtakerAssetAmount = safeSub(
+            order.takerAssetAmount, filledAmount);
+        fillResults.takerAssetFilledAmount = min256(
+            takerAssetFillAmount, remainingtakerAssetAmount);
+
+        // Validate fill order rounding
+        if (isRoundingError(
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.makerAssetAmount))
+        {
+            status = uint8(Errors.ROUNDING_ERROR_TOO_LARGE);
+            return;
+        }
+
+        // Compute proportional transfer amounts
+        // TODO: All three are multiplied by the same fraction. This can
+        // potentially be optimized.
+        fillResults.makerAssetFilledAmount = getPartialAmount(
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.makerAssetAmount);
+        fillResults.makerFeePaid = getPartialAmount(
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.makerFee);
+        fillResults.takerFeePaid = getPartialAmount(
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.takerFee);
+
+        status = uint8(Errors.SUCCESS);
+        return;
+    }
+
+    function updateState(
+        Order memory order,
+        address takerAddress,
+        bytes32 orderHash,
+        FillResults memory fillResults)
+        private
+    {
+        // Update state
+        filled[orderHash] = safeAdd(filled[orderHash], fillResults.takerAssetFilledAmount);
+
+        // Log order
+        emitFillEvent(order, takerAddress, orderHash, fillResults);
+    }
+
     /// @dev Fills the input order.
     /// @param order Order struct containing order specifications.
-    /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
+    /// @param takerAssetFillAmount Desired amount of takerToken to sell.
     /// @param signature Proof that order has been created by maker.
     /// @return Amounts filled and fees paid by maker and taker.
     function fillOrder(
@@ -93,71 +238,44 @@ contract MixinExchangeCore is
         public
         returns (FillResults memory fillResults)
     {
-        // Compute the order hash
-        bytes32 orderHash = getOrderHash(order);
-
-        // Check if order has been cancelled by salt value
-        if (order.salt < makerEpoch[order.makerAddress]) {
-            emit ExchangeError(uint8(Errors.ORDER_CANCELLED), orderHash);
+        // Fetch current order status
+        bytes32 orderHash;
+        uint8 status;
+        uint256 filledAmount;
+        (status, orderHash, filledAmount) = orderStatus(order, signature);
+        if (!isValidOrderStatus(Errors(status))) {
+            emit ExchangeError(uint8(status), orderHash);
+            revert();
+        } else if (status != uint8(Errors.SUCCESS)) {
+            emit ExchangeError(uint8(status), orderHash);
             return fillResults;
         }
 
-        // Check if order has been cancelled by orderHash
-        if (cancelled[orderHash]) {
-            emit ExchangeError(uint8(Errors.ORDER_CANCELLED), orderHash);
-            return fillResults;
-        }
-
-        // Validate order and maker only if first time seen
-        // TODO: Read filled and cancelled only once
-        if (filled[orderHash] == 0) {
-            require(order.makerAssetAmount > 0);
-            require(order.takerAssetAmount > 0);
-            require(isValidSignature(orderHash, order.makerAddress, signature));
-        }
-        
-        // Validate sender is allowed to fill this order
-        if (order.senderAddress != address(0)) {
-            require(order.senderAddress == msg.sender);
-        }
-
-        // Validate taker is allowed to fill this order
+        // Get the taker address
         address takerAddress = getCurrentContextAddress();
-        if (order.takerAddress != address(0)) {
-            require(order.takerAddress == takerAddress);
-        }
-        require(takerAssetFillAmount > 0);
 
-        // Validate order expiration
-        if (block.timestamp >= order.expirationTimeSeconds) {
-            emit ExchangeError(uint8(Errors.ORDER_EXPIRED), orderHash);
+        // Compute proportional fill amounts
+        uint256 makerAssetFilledAmount;
+        uint256 makerFeePaid;
+        uint256 takerFeePaid;
+        (   status,
+            fillResults
+        ) = getFillAmounts(
+            order,
+            filledAmount,
+            takerAssetFillAmount,
+            takerAddress);
+        if (status != uint8(Errors.SUCCESS)) {
+            emit ExchangeError(uint8(status), orderHash);
             return fillResults;
         }
-
-        // Validate order availability
-        uint256 remainingTakerAssetFillAmount = safeSub(order.takerAssetAmount, filled[orderHash]);
-        if (remainingTakerAssetFillAmount == 0) {
-            emit ExchangeError(uint8(Errors.ORDER_FULLY_FILLED), orderHash);
-            return fillResults;
-        }
-
-        // Validate fill order rounding
-        fillResults.takerAssetFilledAmount = min256(takerAssetFillAmount, remainingTakerAssetFillAmount);
-        if (isRoundingError(fillResults.takerAssetFilledAmount, order.takerAssetAmount, order.makerAssetAmount)) {
-            emit ExchangeError(uint8(Errors.ROUNDING_ERROR_TOO_LARGE), orderHash);
-            fillResults.takerAssetFilledAmount = 0;
-            return fillResults;
-        }
-
-        // Update state
-        filled[orderHash] = safeAdd(filled[orderHash], fillResults.takerAssetFilledAmount);
 
         // Settle order
         (fillResults.makerAssetFilledAmount, fillResults.makerFeePaid, fillResults.takerFeePaid) =
             settleOrder(order, takerAddress, fillResults.takerAssetFilledAmount);
 
-        // Log order
-        emitFillEvent(order, takerAddress, orderHash, fillResults);
+        // Update exchange internal state
+        updateState(order, takerAddress, orderHash, fillResults);
         return fillResults;
     }
 
@@ -180,11 +298,11 @@ contract MixinExchangeCore is
         if (order.senderAddress != address(0)) {
             require(order.senderAddress == msg.sender);
         }
-        
+
         // Validate transaction signed by maker
         address makerAddress = getCurrentContextAddress();
         require(order.makerAddress == makerAddress);
-        
+
         if (block.timestamp >= order.expirationTimeSeconds) {
             emit ExchangeError(uint8(Errors.ORDER_EXPIRED), orderHash);
             return false;
