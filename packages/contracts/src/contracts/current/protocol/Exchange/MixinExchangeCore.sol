@@ -243,11 +243,10 @@ contract MixinExchangeCore is
         uint8 status;
         uint256 filledAmount;
         (status, orderHash, filledAmount) = orderStatus(order, signature);
-        if (!isOrderValid(Errors(status))) {
+        if (!isValidOrderStatus(Errors(status))) {
             emit ExchangeError(uint8(status), orderHash);
             revert();
-        }
-        if(! isOrderFillable(Errors(status))) {
+        } else if (status != uint8(Errors.SUCCESS)) {
             emit ExchangeError(uint8(status), orderHash);
             return fillResults;
         }

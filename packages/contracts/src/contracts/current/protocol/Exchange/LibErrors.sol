@@ -38,14 +38,10 @@ contract LibErrors {
 
     event ExchangeError(uint8 indexed errorId, bytes32 indexed orderHash);
 
-    function isOrderValid(Errors status) internal pure returns (bool) {
+    function isValidOrderStatus(Errors status) internal pure returns (bool) {
         if (status == Errors.ORDER_INVALID) return false;
         if (status == Errors.ORDER_SENDER_INVALID) return false;
         if (status == Errors.ORDER_SIGNATURE_INVALID) return false;
         return true;
-    }
-
-    function isOrderFillable(Errors status) internal pure returns (bool) {
-        return (status == Errors.SUCCESS);
     }
 }
