@@ -22,6 +22,7 @@ pragma experimental ABIEncoderV2;
 import "./mixins/MExchangeCore.sol";
 import "./mixins/MSettlement.sol";
 import "./mixins/MSignatureValidator.sol";
+import "./mixins/MTransactions.sol";
 import "./LibOrder.sol";
 import "./LibErrors.sol";
 import "./LibPartialAmount.sol";
@@ -35,6 +36,7 @@ contract MixinExchangeCore is
     MExchangeCore,
     MSettlement,
     MSignatureValidator,
+    MTransactions,
     SafeMath,
     LibErrors,
     LibPartialAmount
@@ -146,6 +148,12 @@ contract MixinExchangeCore is
             return;
         }
 
+        // Validate sender is allowed to fill this order
+        if (order.senderAddress != address(0) && order.senderAddress != msg.sender) {
+            status = uint8(Errors.ORDER_SENDER_INVALID);
+            return;
+        }
+
         // Order is OK
         status = uint8(Errors.SUCCESS);
         return;
@@ -155,16 +163,16 @@ contract MixinExchangeCore is
         Order memory order,
         uint256 filledAmount,
         uint256 takerAssetFillAmount,
-        address taker)
+        address takerAddress)
         public
         pure
         returns (
             uint8 status,
             FillResults memory fillResults)
     {
-        // Validate taker
+        // Validate taker is allowed to fill this order
         if (order.takerAddress != address(0)) {
-            require(order.takerAddress == taker);
+            require(order.takerAddress == takerAddress);
         }
         require(takerAssetFillAmount > 0);
 
@@ -206,29 +214,16 @@ contract MixinExchangeCore is
 
     function updateState(
         Order memory order,
+        address takerAddress,
         bytes32 orderHash,
-        uint256 makerAssetFilledAmount,
-        uint256 takerAssetFilledAmount,
-        uint256 makerFeePaid,
-        uint256 takerFeePaid)
+        FillResults memory fillResults)
         private
     {
         // Update state
-        filled[orderHash] = safeAdd(filled[orderHash], takerAssetFilledAmount);
+        filled[orderHash] = safeAdd(filled[orderHash], fillResults.takerAssetFilledAmount);
 
         // Log order
-        emit Fill(
-            order.makerAddress,
-            msg.sender,
-            order.feeRecipientAddress,
-            makerAssetFilledAmount,
-            takerAssetFilledAmount,
-            makerFeePaid,
-            takerFeePaid,
-            orderHash,
-            order.makerAssetData,
-            order.takerAssetData
-        );
+        emitFillEvent(order, takerAddress, orderHash, fillResults);
     }
 
     /// @dev Fills the input order.
@@ -248,14 +243,17 @@ contract MixinExchangeCore is
         uint8 status;
         uint256 filledAmount;
         (status, orderHash, filledAmount) = orderStatus(order, signature);
-        if (status != uint8(Errors.SUCCESS)) {
+        if (!isOrderValid(Errors(status))) {
             emit ExchangeError(uint8(status), orderHash);
-            // If the order was invalid then throw an exception,
-            // otherwise gracefully return fill results.
-            require(Errors(status) != Errors.ORDER_INVALID);
-            require(Errors(status) != Errors.ORDER_SIGNATURE_INVALID);
+            revert();
+        }
+        if(! isOrderFillable(Errors(status))) {
+            emit ExchangeError(uint8(status), orderHash);
             return fillResults;
         }
+
+        // Get the taker address
+        address takerAddress = getCurrentContextAddress();
 
         // Compute proportional fill amounts
         uint256 makerAssetFilledAmount;
@@ -267,7 +265,7 @@ contract MixinExchangeCore is
             order,
             filledAmount,
             takerAssetFillAmount,
-            msg.sender);
+            takerAddress);
         if (status != uint8(Errors.SUCCESS)) {
             emit ExchangeError(uint8(status), orderHash);
             return fillResults;
@@ -275,16 +273,10 @@ contract MixinExchangeCore is
 
         // Settle order
         (fillResults.makerAssetFilledAmount, fillResults.makerFeePaid, fillResults.takerFeePaid) =
-            settleOrder(order, msg.sender, fillResults.takerAssetFilledAmount);
+            settleOrder(order, takerAddress, fillResults.takerAssetFilledAmount);
 
         // Update exchange internal state
-        updateState(
-            order,
-            orderHash,
-            fillResults.makerAssetFilledAmount,
-            fillResults.takerAssetFilledAmount,
-            fillResults.makerFeePaid,
-            fillResults.takerFeePaid);
+        updateState(order, takerAddress, orderHash, fillResults);
         return fillResults;
     }
 
@@ -302,7 +294,15 @@ contract MixinExchangeCore is
         // Validate the order
         require(order.makerAssetAmount > 0);
         require(order.takerAssetAmount > 0);
-        require(order.makerAddress == msg.sender);
+
+        // Validate sender is allowed to cancel this order
+        if (order.senderAddress != address(0)) {
+            require(order.senderAddress == msg.sender);
+        }
+
+        // Validate transaction signed by maker
+        address makerAddress = getCurrentContextAddress();
+        require(order.makerAddress == makerAddress);
 
         if (block.timestamp >= order.expirationTimeSeconds) {
             emit ExchangeError(uint8(Errors.ORDER_EXPIRED), orderHash);
@@ -356,5 +356,28 @@ contract MixinExchangeCore is
         );
         isError = errPercentageTimes1000000 > 1000;
         return isError;
+    }
+
+    /// @dev Logs a Fill event with the given arguments.
+    ///      The sole purpose of this function is to get around the stack variable limit.
+    function emitFillEvent(
+        Order memory order,
+        address takerAddress,
+        bytes32 orderHash,
+        FillResults memory fillResults)
+        internal
+    {
+        emit Fill(
+            order.makerAddress,
+            takerAddress,
+            order.feeRecipientAddress,
+            fillResults.makerAssetFilledAmount,
+            fillResults.takerAssetFilledAmount,
+            fillResults.makerFeePaid,
+            fillResults.takerFeePaid,
+            orderHash,
+            order.makerAssetData,
+            order.takerAssetData
+        );
     }
 }

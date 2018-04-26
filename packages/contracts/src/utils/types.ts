@@ -79,6 +79,7 @@ export enum ExchangeContractErrs {
     ERROR_SUCCESS,
     ERROR_ORDER_INVALID,
     ERROR_ORDER_SIGNATURE_INVALID,
+    ERROR_ORDER_SENDER_INVALID,
     ERROR_ORDER_EXPIRED,
     ERROR_ORDER_FULLY_FILLED,
     ERROR_ORDER_CANCELLED,
@@ -126,6 +127,7 @@ export interface SignedOrder extends UnsignedOrder {
 }
 
 export interface OrderStruct {
+    senderAddress: string;
     makerAddress: string;
     takerAddress: string;
     feeRecipientAddress: string;
@@ -151,4 +153,12 @@ export enum SignatureType {
     EIP712,
     Trezor,
     Contract,
+}
+
+export interface SignedTransaction {
+    exchangeAddress: string;
+    salt: BigNumber;
+    signer: string;
+    data: string;
+    signature: string;
 }

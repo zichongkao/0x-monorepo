@@ -27,6 +27,7 @@ contract LibErrors {
         SUCCESS,                           // Operation executed normaly
         ORDER_INVALID,                     // Order is invalid
         ORDER_SIGNATURE_INVALID,           // Signature invalid
+        ORDER_SENDER_INVALID,              // Sender invalid
         ORDER_EXPIRED,                     // Order has already expired
         ORDER_FULLY_FILLED,                // Order has already been fully filled
         ORDER_CANCELLED,                   // Order has already been cancelled
@@ -37,4 +38,14 @@ contract LibErrors {
 
     event ExchangeError(uint8 indexed errorId, bytes32 indexed orderHash);
 
+    function isOrderValid(Errors status) internal pure returns (bool) {
+        if (status == Errors.ORDER_INVALID) return false;
+        if (status == Errors.ORDER_SENDER_INVALID) return false;
+        if (status == Errors.ORDER_SIGNATURE_INVALID) return false;
+        return true;
+    }
+
+    function isOrderFillable(Errors status) internal pure returns (bool) {
+        return (status == Errors.SUCCESS);
+    }
 }
