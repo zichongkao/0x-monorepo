@@ -1,12 +1,22 @@
 [
     {
+        "version": "0.6.0",
+        "changes": [
+            {
+                "note": "Update ethers-contracts to ethers.js",
+                "pr": 540
+            }
+        ]
+    },
+    {
         "version": "0.5.2",
         "changes": [
             {
                 "note": "Export NULL_BYTES constant",
                 "pr": 500
             }
-        ]
+        ],
+        "timestamp": 1524044013
     },
     {
         "timestamp": 1523462196,

@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import * as injectTapEventPlugin from 'react-tap-event-plugin';
 import { createStore, Store as ReduxStore } from 'redux';
+import { Redirecter } from 'ts/components/redirecter';
 import { About } from 'ts/containers/about';
 import { FAQ } from 'ts/containers/faq';
 import { Landing } from 'ts/containers/landing';
@@ -74,10 +75,12 @@ render(
                         <Switch>
                             <Route exact={true} path="/" component={Landing as any} />
                             <Redirect from="/otc" to={`${WebsitePaths.Portal}`} />
-                            <Route path={`${WebsitePaths.Portal}`} component={LazyPortal} />
-                            <Route path={`${WebsitePaths.FAQ}`} component={FAQ as any} />
-                            <Route path={`${WebsitePaths.About}`} component={About as any} />
-                            <Route path={`${WebsitePaths.Wiki}`} component={Wiki as any} />
+
+                            <Route path={WebsitePaths.Jobs} component={Redirecter as any} />
+                            <Route path={WebsitePaths.Portal} component={LazyPortal} />
+                            <Route path={WebsitePaths.FAQ} component={FAQ as any} />
+                            <Route path={WebsitePaths.About} component={About as any} />
+                            <Route path={WebsitePaths.Wiki} component={Wiki as any} />
                             <Route path={`${WebsitePaths.ZeroExJs}/:version?`} component={LazyZeroExJSDocumentation} />
                             <Route path={`${WebsitePaths.Connect}/:version?`} component={LazyConnectDocumentation} />
                             <Route path={`${WebsitePaths.Deployer}/:version?`} component={LazyDeployerDocumentation} />

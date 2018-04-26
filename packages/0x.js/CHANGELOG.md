@@ -5,13 +5,27 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v0.36.3 - _April 18, 2018_
+
+    * Move @0xproject/migrations to devDependencies
+
+## v0.36.2 - _April 18, 2018_
+
+    * Dependencies updated
+
+## v0.36.1 - _April 18, 2018_
+
+    * Internal changes and refactoring
+    * Fix redundant expired order removal bug (#527)
+
 ## v0.36.0 - _April 11, 2018_
 
     * Moved Web3.Provider to `@0xproject/types:Provider` (#501)
+    * Add `zeroEx.exchange.getOrderStateAsync` to allow obtaining current OrderState for a signedOrder (#510)
 
 ## v0.35.0 - _April 2, 2018_
 
-    * Removed `ZeroExError.TransactionMiningTimeout` and moved it to '@0xproject/web3_wrapper' `Web3WrapperErrors.TransactionMiningTimeout` (#485)
+    * Removed `ZeroExError.TransactionMiningTimeout` and moved it to '@0xproject/web3-wrapper' `Web3WrapperErrors.TransactionMiningTimeout` (#485)
 
 ## v0.34.0 - _April 2, 2018_
 

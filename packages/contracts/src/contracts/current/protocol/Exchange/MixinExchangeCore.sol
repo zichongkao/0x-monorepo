@@ -39,7 +39,7 @@ contract MixinExchangeCore is
     LibErrors,
     LibPartialAmount
 {
-    // Mapping of orderHash => amount of takerToken already bought by maker
+    // Mapping of orderHash => amount of takerAsset already bought by maker
     mapping (bytes32 => uint256) public filled;
 
     // Mapping of orderHash => cancelled
@@ -53,21 +53,21 @@ contract MixinExchangeCore is
         address indexed makerAddress,
         address takerAddress,
         address indexed feeRecipientAddress,
-        bytes makerAssetData,
-        bytes takerAssetData,
-        uint256 makerTokenFilledAmount,
-        uint256 takerTokenFilledAmount,
+        uint256 makerAssetFilledAmount,
+        uint256 takerAssetFilledAmount,
         uint256 makerFeePaid,
         uint256 takerFeePaid,
-        bytes32 indexed orderHash
+        bytes32 indexed orderHash,
+        bytes makerAssetData,
+        bytes takerAssetData
     );
 
     event Cancel(
         address indexed makerAddress,
         address indexed feeRecipientAddress,
+        bytes32 indexed orderHash,
         bytes makerAssetData,
-        bytes takerAssetData,
-        bytes32 indexed orderHash
+        bytes takerAssetData
     );
 
     event CancelUpTo(
@@ -96,21 +96,21 @@ contract MixinExchangeCore is
         // Validations on order only if first time seen
         if (filledAmount == 0) {
 
-            // If order.takerTokenAmount is zero, then the order will always
+            // If order.takerAssetAmount is zero, then the order will always
             // be considered filled because:
-            //    0 == takerTokenAmount == filledAmount
+            //    0 == takerAssetAmount == filledAmount
             // Instead of distinguishing between unfilled and filled zero taker
             // amount orders, we choose not to support them.
-            if(order.takerTokenAmount == 0) {
+            if(order.takerAssetAmount == 0) {
                 status = uint8(Errors.ORDER_INVALID);
                 return;
             }
 
-            // If order.makerTokenAmount is zero, we also reject the order.
+            // If order.makerAssetAmount is zero, we also reject the order.
             // While the Exchange contract handles them correctly, they create
             // edge cases in the supporting infrastructure because they have
             // an 'infinite' price when computed by a simple division.
-            if(order.makerTokenAmount == 0) {
+            if(order.makerAssetAmount == 0) {
                 status = uint8(Errors.ORDER_INVALID);
                 return;
             }
@@ -129,7 +129,7 @@ contract MixinExchangeCore is
         }
 
         // Validate order availability
-        if (filledAmount >= order.takerTokenAmount) {
+        if (filledAmount >= order.takerAssetAmount) {
             status = uint8(Errors.ORDER_FULLY_FILLED);
             return;
         }
@@ -154,7 +154,7 @@ contract MixinExchangeCore is
     function getFillAmounts(
         Order memory order,
         uint256 filledAmount,
-        uint256 takerTokenFillAmount,
+        uint256 takerAssetFillAmount,
         address taker)
         public
         pure
@@ -166,18 +166,19 @@ contract MixinExchangeCore is
         if (order.takerAddress != address(0)) {
             require(order.takerAddress == taker);
         }
+        require(takerAssetFillAmount > 0);
 
-        // Compute takerTokenFilledAmount
-        uint256 remainingTakerTokenAmount = safeSub(
-            order.takerTokenAmount, filledAmount);
-        fillResults.takerTokenFilledAmount = min256(
-            takerTokenFillAmount, remainingTakerTokenAmount);
+        // Compute takerAssetFilledAmount
+        uint256 remainingtakerAssetAmount = safeSub(
+            order.takerAssetAmount, filledAmount);
+        fillResults.takerAssetFilledAmount = min256(
+            takerAssetFillAmount, remainingtakerAssetAmount);
 
         // Validate fill order rounding
         if (isRoundingError(
-            fillResults.takerTokenFilledAmount,
-            order.takerTokenAmount,
-            order.makerTokenAmount))
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.makerAssetAmount))
         {
             status = uint8(Errors.ROUNDING_ERROR_TOO_LARGE);
             return;
@@ -186,17 +187,17 @@ contract MixinExchangeCore is
         // Compute proportional transfer amounts
         // TODO: All three are multiplied by the same fraction. This can
         // potentially be optimized.
-        fillResults.makerTokenFilledAmount = getPartialAmount(
-            fillResults.takerTokenFilledAmount,
-            order.takerTokenAmount,
-            order.makerTokenAmount);
+        fillResults.makerAssetFilledAmount = getPartialAmount(
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
+            order.makerAssetAmount);
         fillResults.makerFeePaid = getPartialAmount(
-            fillResults.takerTokenFilledAmount,
-            order.takerTokenAmount,
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
             order.makerFee);
         fillResults.takerFeePaid = getPartialAmount(
-            fillResults.takerTokenFilledAmount,
-            order.takerTokenAmount,
+            fillResults.takerAssetFilledAmount,
+            order.takerAssetAmount,
             order.takerFee);
 
         status = uint8(Errors.SUCCESS);
@@ -206,38 +207,38 @@ contract MixinExchangeCore is
     function updateState(
         Order memory order,
         bytes32 orderHash,
-        uint256 makerTokenFilledAmount,
-        uint256 takerTokenFilledAmount,
+        uint256 makerAssetFilledAmount,
+        uint256 takerAssetFilledAmount,
         uint256 makerFeePaid,
         uint256 takerFeePaid)
         private
     {
         // Update state
-        filled[orderHash] = safeAdd(filled[orderHash], takerTokenFilledAmount);
+        filled[orderHash] = safeAdd(filled[orderHash], takerAssetFilledAmount);
 
         // Log order
         emit Fill(
             order.makerAddress,
             msg.sender,
             order.feeRecipientAddress,
-            order.makerAssetData,
-            order.takerAssetData,
-            makerTokenFilledAmount,
-            takerTokenFilledAmount,
+            makerAssetFilledAmount,
+            takerAssetFilledAmount,
             makerFeePaid,
             takerFeePaid,
-            orderHash
+            orderHash,
+            order.makerAssetData,
+            order.takerAssetData
         );
     }
 
     /// @dev Fills the input order.
     /// @param order Order struct containing order specifications.
-    /// @param takerTokenFillAmount Desired amount of takerToken to sell.
+    /// @param takerAssetFillAmount Desired amount of takerToken to sell.
     /// @param signature Proof that order has been created by maker.
     /// @return Amounts filled and fees paid by maker and taker.
     function fillOrder(
         Order memory order,
-        uint256 takerTokenFillAmount,
+        uint256 takerAssetFillAmount,
         bytes memory signature)
         public
         returns (FillResults memory fillResults)
@@ -253,7 +254,7 @@ contract MixinExchangeCore is
         }
 
         // Compute proportional fill amounts
-        uint256 makerTokenFilledAmount;
+        uint256 makerAssetFilledAmount;
         uint256 makerFeePaid;
         uint256 takerFeePaid;
         (   status,
@@ -261,7 +262,7 @@ contract MixinExchangeCore is
         ) = getFillAmounts(
             order,
             filledAmount,
-            takerTokenFillAmount,
+            takerAssetFillAmount,
             msg.sender);
         if(status != uint8(Errors.SUCCESS)) {
             emit ExchangeError(uint8(status), orderHash);
@@ -269,15 +270,15 @@ contract MixinExchangeCore is
         }
 
         // Settle order
-        (fillResults.makerTokenFilledAmount, fillResults.makerFeePaid, fillResults.takerFeePaid) =
-            settleOrder(order, msg.sender, fillResults.takerTokenFilledAmount);
+        (fillResults.makerAssetFilledAmount, fillResults.makerFeePaid, fillResults.takerFeePaid) =
+            settleOrder(order, msg.sender, fillResults.takerAssetFilledAmount);
 
         // Update exchange internal state
         updateState(
             order,
             orderHash,
-            fillResults.makerTokenFilledAmount,
-            fillResults.takerTokenFilledAmount,
+            fillResults.makerAssetFilledAmount,
+            fillResults.takerAssetFilledAmount,
             fillResults.makerFeePaid,
             fillResults.takerFeePaid);
         return fillResults;
@@ -295,8 +296,8 @@ contract MixinExchangeCore is
         bytes32 orderHash = getOrderHash(order);
 
         // Validate the order
-        require(order.makerTokenAmount > 0);
-        require(order.takerTokenAmount > 0);
+        require(order.makerAssetAmount > 0);
+        require(order.takerAssetAmount > 0);
         require(order.makerAddress == msg.sender);
 
         if (block.timestamp >= order.expirationTimeSeconds) {
@@ -314,9 +315,9 @@ contract MixinExchangeCore is
         emit Cancel(
             order.makerAddress,
             order.feeRecipientAddress,
+            orderHash,
             order.makerAssetData,
-            order.takerAssetData,
-            orderHash
+            order.takerAssetData
         );
         return true;
     }

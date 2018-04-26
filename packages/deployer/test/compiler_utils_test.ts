@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import * as dirtyChai from 'dirty-chai';
+import * as _ from 'lodash';
 import 'mocha';
 
 import {
@@ -47,34 +48,36 @@ describe('Compiler utils', () => {
     });
     describe('#parseDependencies', () => {
         it('correctly parses Exchange dependencies', async () => {
-            const exchangeSource = await fsWrapper.readFileAsync(`${__dirname}/fixtures/contracts/main/Exchange.sol`, {
+            const path = `${__dirname}/fixtures/contracts/Exchange.sol`;
+            const source = await fsWrapper.readFileAsync(path, {
                 encoding: 'utf8',
             });
-            const sourceFileId = '/main/Exchange.sol';
-            expect(parseDependencies(exchangeSource, sourceFileId)).to.be.deep.equal([
-                '/main/TokenTransferProxy.sol',
-                '/base/Token.sol',
-                '/base/SafeMath.sol',
-            ]);
+            const dependencies = parseDependencies({ source, path });
+            const expectedDependencies = [
+                'zeppelin-solidity/contracts/token/ERC20/ERC20.sol',
+                'packages/deployer/lib/test/fixtures/contracts/TokenTransferProxy.sol',
+                'packages/deployer/lib/test/fixtures/contracts/base/SafeMath.sol',
+            ];
+            _.each(expectedDependencies, expectedDepdency => {
+                const foundDependency = _.find(dependencies, dependency => _.endsWith(dependency, expectedDepdency));
+                expect(foundDependency, `${expectedDepdency} not found`).to.not.be.undefined();
+            });
         });
         it('correctly parses TokenTransferProxy dependencies', async () => {
-            const exchangeSource = await fsWrapper.readFileAsync(
-                `${__dirname}/fixtures/contracts/main/TokenTransferProxy.sol`,
-                {
-                    encoding: 'utf8',
-                },
-            );
-            const sourceFileId = '/main/TokenTransferProxy.sol';
-            expect(parseDependencies(exchangeSource, sourceFileId)).to.be.deep.equal([
-                '/base/Token.sol',
-                '/base/Ownable.sol',
+            const path = `${__dirname}/fixtures/contracts/TokenTransferProxy.sol`;
+            const source = await fsWrapper.readFileAsync(path, {
+                encoding: 'utf8',
+            });
+            expect(parseDependencies({ source, path })).to.be.deep.equal([
+                'zeppelin-solidity/contracts/ownership/Ownable.sol',
+                'zeppelin-solidity/contracts/token/ERC20/ERC20.sol',
             ]);
         });
         // TODO: For now that doesn't work. This will work after we switch to a grammar-based parser
         it.skip('correctly parses commented out dependencies', async () => {
-            const contractWithCommentedOutDependencies = `// import "./TokenTransferProxy.sol";`;
-            const sourceFileId = '/main/TokenTransferProxy.sol';
-            expect(parseDependencies(contractWithCommentedOutDependencies, sourceFileId)).to.be.deep.equal([]);
+            const path = '';
+            const source = `// import "./TokenTransferProxy.sol";`;
+            expect(parseDependencies({ path, source })).to.be.deep.equal([]);
         });
     });
 });

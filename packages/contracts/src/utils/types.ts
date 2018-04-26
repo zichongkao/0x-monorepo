@@ -1,9 +1,15 @@
 import { AbiDefinition, ContractAbi } from '@0xproject/types';
 import { BigNumber } from '@0xproject/utils';
 
-export interface BalancesByOwner {
+export interface ERC20BalancesByOwner {
     [ownerAddress: string]: {
         [tokenAddress: string]: BigNumber;
+    };
+}
+
+export interface ERC721TokenIdsByOwner {
+    [ownerAddress: string]: {
+        [tokenAddress: string]: BigNumber[];
     };
 }
 
@@ -14,19 +20,19 @@ export interface SubmissionContractEventArgs {
 export interface BatchFillOrders {
     orders: OrderStruct[];
     signatures: string[];
-    takerTokenFillAmounts: BigNumber[];
+    takerAssetFillAmounts: BigNumber[];
 }
 
 export interface MarketSellOrders {
     orders: OrderStruct[];
     signatures: string[];
-    takerTokenFillAmount: BigNumber;
+    takerAssetFillAmount: BigNumber;
 }
 
 export interface MarketBuyOrders {
     orders: OrderStruct[];
     signatures: string[];
-    makerTokenFillAmount: BigNumber;
+    makerAssetFillAmount: BigNumber;
 }
 
 export interface BatchCancelOrders {
@@ -41,20 +47,6 @@ export enum AssetProxyId {
     INVALID,
     ERC20,
     ERC721,
-}
-
-export interface DefaultOrderParams {
-    exchangeAddress: string;
-    makerAddress: string;
-    feeRecipientAddress: string;
-    makerTokenAddress: string;
-    takerTokenAddress: string;
-    makerTokenAmount: BigNumber;
-    takerTokenAmount: BigNumber;
-    makerFee: BigNumber;
-    takerFee: BigNumber;
-    makerAssetData: string;
-    takerAssetData: string;
 }
 
 export interface TransactionDataParams {
@@ -82,11 +74,6 @@ export interface Token {
     swarmHash: string;
 }
 
-export interface TokenInfoByNetwork {
-    development: Token[];
-    live: Token[];
-}
-
 export enum ExchangeContractErrs {
     ERROR_INVALID,
     ERROR_SUCCESS,
@@ -103,18 +90,18 @@ export enum ContractName {
     MultiSigWalletWithTimeLock = 'MultiSigWalletWithTimeLock',
     Exchange = 'Exchange',
     ZRXToken = 'ZRXToken',
-    DummyToken = 'DummyToken',
+    DummyERC20Token = 'DummyERC20Token',
     EtherToken = 'WETH9',
     MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress = 'MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress',
-    MaliciousToken = 'MaliciousToken',
     AccountLevels = 'AccountLevels',
     EtherDelta = 'EtherDelta',
     Arbitrage = 'Arbitrage',
-    AssetProxyDispatcher = 'AssetProxyDispatcher',
+    TestAssetProxyDispatcher = 'TestAssetProxyDispatcher',
     ERC20Proxy = 'ERC20Proxy',
     ERC721Proxy = 'ERC721Proxy',
     DummyERC721Token = 'DummyERC721Token',
     LibBytes = 'LibBytes',
+    Authorizable = 'Authorizable',
 }
 
 export interface Artifact {
@@ -141,8 +128,8 @@ export interface OrderStruct {
     makerAddress: string;
     takerAddress: string;
     feeRecipientAddress: string;
-    makerTokenAmount: BigNumber;
-    takerTokenAmount: BigNumber;
+    makerAssetAmount: BigNumber;
+    takerAssetAmount: BigNumber;
     makerFee: BigNumber;
     takerFee: BigNumber;
     expirationTimeSeconds: BigNumber;

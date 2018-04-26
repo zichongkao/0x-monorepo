@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "contracts",
-    "version": "2.1.22",
+    "version": "2.1.25",
     "description": "Smart contract components of 0x protocol",
     "main": "index.js",
     "directories": {
@@ -15,10 +15,13 @@
         "test": "run-s build run_mocha",
         "test:coverage": "SOLIDITY_COVERAGE=true run-s build run_mocha coverage:report:text coverage:report:lcov",
         "run_mocha": "mocha 'lib/test/**/*.js' --timeout 100000 --bail --exit",
-        "compile:comment": "Yarn workspaces do not link binaries correctly so we need to reference them directly https://github.com/yarnpkg/yarn/issues/3846",
-        "compile": "node ../deployer/lib/src/cli.js compile --contracts ${npm_package_config_contracts} --contract-dirs ${npm_package_config_contract_dirs} --artifacts-dir ../migrations/src/artifacts",
-        "clean": "shx rm -rf ./lib",
-        "generate_contract_wrappers": "node ../abi-gen/lib/index.js --abis  ${npm_package_config_abis} --template ../contract_templates/contract.handlebars --partials '../contract_templates/partials/**/*.handlebars' --output src/contract_wrappers/generated --backend ethers && prettier --write 'src/contract_wrappers/generated/**.ts'",
+        "compile:comment":
+            "Yarn workspaces do not link binaries correctly so we need to reference them directly https://github.com/yarnpkg/yarn/issues/3846",
+        "compile":
+            "node ../deployer/lib/src/cli.js compile --contracts ${npm_package_config_contracts} --contracts-dir src/contracts --artifacts-dir ../migrations/src/artifacts",
+        "clean": "shx rm -rf ./lib ./src/contract_wrappers/generated",
+        "generate_contract_wrappers":
+            "node ../abi-gen/lib/index.js --abis  ${npm_package_config_abis} --template ../contract_templates/contract.handlebars --partials '../contract_templates/partials/**/*.handlebars' --output src/contract_wrappers/generated --backend ethers && prettier --write 'src/contract_wrappers/generated/**.ts'",
         "lint": "tslint --project . 'migrations/**/*.ts' 'test/**/*.ts' 'util/**/*.ts' 'deploy/**/*.ts'",
         "coverage:report:text": "istanbul report text",
         "coverage:report:html": "istanbul report html && open coverage/index.html",
@@ -26,9 +29,10 @@
         "test:circleci": "yarn test:coverage"
     },
     "config": {
-        "abis": "../migrations/src/artifacts/@(DummyToken|Exchange|TokenRegistry|MultiSigWallet|MultiSigWalletWithTimeLock|MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress|TokenRegistry|ZRXToken|AssetProxyDispatcher|ERC20Proxy|ERC721Proxy|DummyERC721Token|LibBytes).json",
-        "contracts": "Exchange,DummyToken,ZRXToken,Token,WETH9,MultiSigWallet,MultiSigWalletWithTimeLock,MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress,MaliciousToken,TokenRegistry,AssetProxyDispatcher,ERC20Proxy,ERC721Proxy,DummyERC721Token,LibBytes",
-        "contract_dirs": "src/contracts,zeppelin:../../node_modules/zeppelin-solidity"
+        "abis":
+            "../migrations/src/artifacts/@(DummyERC20Token|Exchange|TokenRegistry|MultiSigWallet|MultiSigWalletWithTimeLock|MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress|TokenRegistry|ZRXToken|TestAssetProxyDispatcher|ERC20Proxy|ERC721Proxy|DummyERC721Token|LibBytes|Authorizable).json",
+        "contracts":
+            "Exchange,DummyERC20Token,ZRXToken,WETH9,MultiSigWallet,MultiSigWalletWithTimeLock,MultiSigWalletWithTimeLockExceptRemoveAuthorizedAddress,TokenRegistry,TestAssetProxyDispatcher,ERC20Proxy,ERC721Proxy,DummyERC721Token,LibBytes,Authorizable"
     },
     "repository": {
         "type": "git",
@@ -41,8 +45,8 @@
     },
     "homepage": "https://github.com/0xProject/0x-monorepo/packages/contracts/README.md",
     "devDependencies": {
-        "@0xproject/dev-utils": "^0.3.5",
-        "@0xproject/tslint-config": "^0.4.15",
+        "@0xproject/dev-utils": "^0.3.6",
+        "@0xproject/tslint-config": "^0.4.16",
         "@types/lodash": "4.14.104",
         "@types/node": "^8.0.53",
         "@types/yargs": "^10.0.0",
@@ -55,18 +59,18 @@
         "npm-run-all": "^4.1.2",
         "prettier": "^1.11.1",
         "shx": "^0.2.2",
-        "solc": "^0.4.18",
+        "solc": "^0.4.23",
         "tslint": "5.8.0",
         "typescript": "2.7.1",
         "yargs": "^10.0.3"
     },
     "dependencies": {
-        "0x.js": "^0.36.0",
-        "@0xproject/deployer": "^0.4.0",
-        "@0xproject/types": "^0.6.0",
-        "@0xproject/typescript-typings": "^0.1.0",
-        "@0xproject/utils": "^0.5.1",
-        "@0xproject/web3-wrapper": "^0.6.0",
+        "0x.js": "^0.36.3",
+        "@0xproject/deployer": "^0.4.1",
+        "@0xproject/types": "^0.6.1",
+        "@0xproject/typescript-typings": "^0.2.0",
+        "@0xproject/utils": "^0.5.2",
+        "@0xproject/web3-wrapper": "^0.6.1",
         "bn.js": "^4.11.8",
         "ethereumjs-abi": "^0.6.4",
         "ethereumjs-util": "^5.1.1",

@@ -1,10 +1,55 @@
 [
     {
+        "version": "0.36.4",
+        "changes": [
+            {
+                "note": "Fixed expiration watcher comparator to handle orders with equal expiration times",
+                "pr": 526
+            }
+        ]
+    },
+    {
+        "version": "0.36.3",
+        "changes": [
+            {
+                "note": "Move @0xproject/migrations to devDependencies"
+            }
+        ],
+        "timestamp": 1524079658
+    },
+    {
+        "timestamp": 1524073495,
+        "version": "0.36.2",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ]
+    },
+    {
+        "version": "0.36.1",
+        "changes": [
+            {
+                "note": "Internal changes and refactoring"
+            },
+            {
+                "note": "Fix redundant expired order removal bug",
+                "pr": 527
+            }
+        ],
+        "timestamp": 1524044013
+    },
+    {
         "version": "0.36.0",
         "changes": [
             {
                 "note": "Moved Web3.Provider to `@0xproject/types:Provider`",
                 "pr": 501
+            },
+            {
+                "note":
+                    "Add `zeroEx.exchange.getOrderStateAsync` to allow obtaining current OrderState for a signedOrder",
+                "pr": 510
             }
         ],
         "timestamp": 1523462196
