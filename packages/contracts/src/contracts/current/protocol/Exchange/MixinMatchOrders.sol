@@ -19,9 +19,9 @@ import "./mixins/MMatchOrders.sol";
 import "./mixins/MSettlement.sol";
 import "./mixins/MTransactions.sol";
 import "../../utils/SafeMath/SafeMath.sol";
-import "./LibOrder.sol";
-import "./LibStatus.sol";
-import "./LibPartialAmount.sol";
+import "./libs/LibMath.sol";
+import "./libs/LibOrder.sol";
+import "./libs/LibStatus.sol";
 import "../../utils/LibBytes/LibBytes.sol";
 
 contract MixinMatchOrders is
@@ -29,7 +29,7 @@ contract MixinMatchOrders is
     LibBytes,
     LibStatus,
     LibOrder,
-    LibPartialAmount,
+    LibMath,
     MExchangeCore,
     MMatchOrders,
     MSettlement,

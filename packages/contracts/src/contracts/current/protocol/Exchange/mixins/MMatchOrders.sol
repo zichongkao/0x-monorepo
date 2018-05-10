@@ -18,7 +18,7 @@
 pragma solidity ^0.4.21;
 pragma experimental ABIEncoderV2;
 
-import "../LibOrder.sol";
+import "../libs/LibOrder.sol";
 import "./MExchangeCore.sol";
 
 contract MMatchOrders is
