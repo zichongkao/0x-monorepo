@@ -28,24 +28,25 @@ import "./MixinTransactions.sol";
 import "./MixinMatchOrders.sol";
 
 contract Exchange is
-    MixinAssetProxyDispatcher,
     MixinExchangeCore,
-    MixinSettlement,
     MixinMatchOrders,
+    MixinSettlement,
     MixinSignatureValidator,
     MixinTransactions,
+    MixinAssetProxyDispatcher,
     MixinWrapperFunctions
 {
+
     string constant public VERSION = "2.0.1-alpha";
 
     constructor (bytes memory _zrxProxyData)
         public
-        MixinAssetProxyDispatcher()
         MixinExchangeCore()
-        MixinSettlement(_zrxProxyData)
         MixinMatchOrders()
+        MixinSettlement(_zrxProxyData)
         MixinSignatureValidator()
         MixinTransactions()
+        MixinAssetProxyDispatcher()
         MixinWrapperFunctions()
     {}
 }

@@ -105,8 +105,8 @@ contract MixinSettlement is
     /// @param matchedFillResults Struct holding amounts to transfer between makers, taker, and fee recipients.
     /// @param takerAddress Address that matched the orders. The taker receives the spread between orders as profit.
     function settleMatchedOrders(
-        Order memory leftOrder,
-        Order memory rightOrder,
+        LibOrder.Order memory leftOrder,
+        LibOrder.Order memory rightOrder,
         MatchedFillResults memory matchedFillResults,
         address takerAddress)
         internal

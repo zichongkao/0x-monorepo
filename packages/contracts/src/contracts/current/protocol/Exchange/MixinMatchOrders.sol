@@ -27,9 +27,9 @@ import "../../utils/LibBytes/LibBytes.sol";
 contract MixinMatchOrders is
     SafeMath,
     LibBytes,
+    LibMath,
     LibStatus,
     LibOrder,
-    LibMath,
     MExchangeCore,
     MMatchOrders,
     MSettlement,

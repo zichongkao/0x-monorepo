@@ -17,6 +17,7 @@
 */
 
 pragma solidity ^0.4.23;
+pragma experimental ABIEncoderV2;
 
 import "../libs/LibOrder.sol";
 import "../libs/LibFillResults.sol";
@@ -69,7 +70,7 @@ contract MExchangeCore is
     /// @return status Status of order. Statuses are defined in the LibStatus.Status struct.
     /// @return orderHash Keccak-256 EIP712 hash of the order.
     /// @return takerAssetFilledAmount Amount of order that has been filled.
-    function getOrderInfo(Order memory order)
+    function getOrderInfo(LibOrder.Order memory order)
         public
         view
         returns (
@@ -86,7 +87,7 @@ contract MExchangeCore is
     /// @param takerAddress Address of order taker.
     /// @param takerAssetFillAmount Desired amount of order to fill by taker.
     function validateFillOrderContextOrRevert(
-        Order memory order,
+        LibOrder.Order memory order,
         uint8 orderStatus,
         bytes32 orderHash,
         uint256 takerAssetFilledAmount,
@@ -103,7 +104,7 @@ contract MExchangeCore is
     /// @return status Return status of calculating fill amounts. Returns Status.SUCCESS on success.
     /// @return fillResults Amounts filled and fees paid by maker and taker.
     function calculateFillResults(
-        Order memory order,
+        LibOrder.Order memory order,
         uint8 orderStatus,
         uint256 takerAssetFilledAmount,
         uint256 takerAssetFillAmount)
@@ -111,17 +112,17 @@ contract MExchangeCore is
         pure
         returns (
             uint8 status,
-            FillResults memory fillResults);
+            LibFillResults.FillResults memory fillResults);
 
     /// @dev Updates state with results of a fill order.
     /// @param order that was filled.
     /// @param takerAddress Address of taker who filled the order.
     /// @return fillResults Amounts filled and fees paid by maker and taker.
     function updateFilledState(
-        Order memory order,
+        LibOrder.Order memory order,
         address takerAddress,
         bytes32 orderHash,
-        FillResults memory fillResults)
+        LibFillResults.FillResults memory fillResults)
         internal;
 
     /// @dev Fills the input order.
@@ -130,18 +131,18 @@ contract MExchangeCore is
     /// @param signature Proof that order has been created by maker.
     /// @return Amounts filled and fees paid by maker and taker.
     function fillOrder(
-        Order memory order,
+        LibOrder.Order memory order,
         uint256 takerAssetFillAmount,
         bytes memory signature)
         public
-        returns (FillResults memory fillResults);
+        returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Validates context for cancelOrder. Succeeds or throws.
     /// @param order that was cancelled.
     /// @param orderStatus Status of order that was cancelled.
     /// @param orderHash Hash of order that was cancelled.
     function validateCancelOrderContextOrRevert(
-        Order memory order,
+        LibOrder.Order memory order,
         uint8 orderStatus,
         bytes32 orderHash)
         internal;
@@ -154,7 +155,7 @@ contract MExchangeCore is
     /// @param orderHash Hash of order that was cancelled.
     /// @return stateUpdated Returns true only if state was updated.
     function updateCancelledState(
-        Order memory order,
+        LibOrder.Order memory order,
         uint8 orderStatus,
         bytes32 orderHash)
         internal
@@ -164,7 +165,7 @@ contract MExchangeCore is
     /// @param order Order struct containing order specifications.
     /// @return True if the order state changed to cancelled.
     ///         False if the transaction was already cancelled or expired.
-    function cancelOrder(Order memory order)
+    function cancelOrder(LibOrder.Order memory order)
         public
         returns (bool);
 
@@ -172,6 +173,7 @@ contract MExchangeCore is
     function cancelOrdersUpTo(uint256 salt)
         external;
 
+/*
     /// @dev Checks if rounding error > 0.1%.
     /// @param numerator Numerator.
     /// @param denominator Denominator.
@@ -179,5 +181,5 @@ contract MExchangeCore is
     /// @return Rounding error is present.
     function isRoundingError(uint256 numerator, uint256 denominator, uint256 target)
         public pure
-        returns (bool isError);
+        returns (bool isError); */
 }

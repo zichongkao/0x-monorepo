@@ -19,16 +19,14 @@ pragma solidity ^0.4.21;
 pragma experimental ABIEncoderV2;
 
 import "../libs/LibOrder.sol";
+import "../libs/LibFillResults.sol";
 import "./MExchangeCore.sol";
 
-contract MMatchOrders is
-    LibOrder,
-    MExchangeCore
-{
+contract MMatchOrders {
 
     struct MatchedFillResults {
-        FillResults left;
-        FillResults right;
+        LibFillResults.FillResults left;
+        LibFillResults.FillResults right;
     }
 
     /// This struct exists solely to avoid the stack limit constraint
@@ -43,8 +41,8 @@ contract MMatchOrders is
     /// @param leftOrder First order to match.
     /// @param rightOrder Second order to match.
     function validateMatchOrdersContextOrRevert(
-        Order memory leftOrder,
-        Order memory rightOrder)
+        LibOrder.Order memory leftOrder,
+        LibOrder.Order memory rightOrder)
         internal;
 
     /// @dev Validates matched fill results. Succeeds or throws.
@@ -78,8 +76,8 @@ contract MMatchOrders is
     /// @return status Return status of calculating fill amounts. Returns Status.SUCCESS on success.
     /// @param matchedFillResults Amounts to fill and fees to pay by maker and taker of matched orders.
     function calculateMatchedFillResults(
-        Order memory leftOrder,
-        Order memory rightOrder,
+        LibOrder.Order memory leftOrder,
+        LibOrder.Order memory rightOrder,
         uint8 leftOrderStatus,
         uint8 rightOrderStatus,
         uint256 leftOrderFilledAmount,
@@ -99,8 +97,8 @@ contract MMatchOrders is
     /// @param rightSignature Proof that order was created by the right maker.
     /// @return matchedFillResults Amounts filled and fees paid by maker and taker of matched orders.
     function matchOrders(
-        Order memory leftOrder,
-        Order memory rightOrder,
+        LibOrder.Order memory leftOrder,
+        LibOrder.Order memory rightOrder,
         bytes leftSignature,
         bytes rightSignature)
         public

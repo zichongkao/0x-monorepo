@@ -22,6 +22,7 @@ pragma experimental ABIEncoderV2;
 import "./libs/LibFillResults.sol";
 import "./libs/LibOrder.sol";
 import "./libs/LibMath.sol";
+import "./libs/LibStatus.sol";
 import "./libs/LibExchangeErrors.sol";
 import "./mixins/MExchangeCore.sol";
 import "./mixins/MSettlement.sol";
@@ -30,10 +31,10 @@ import "./mixins/MTransactions.sol";
 
 contract MixinExchangeCore is
     SafeMath,
+    LibMath,
     LibStatus,
     LibOrder,
     LibFillResults,
-    LibMath,
     LibExchangeErrors,
     MExchangeCore,
     MSettlement,
@@ -170,7 +171,6 @@ contract MixinExchangeCore is
         }
 
         // Validate taker is allowed to fill this order
-        address takerAddress = getCurrentContextAddress();
         if (order.takerAddress != address(0)) {
             require(
                 order.takerAddress == takerAddress,
