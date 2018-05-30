@@ -4,7 +4,7 @@ import { devToolsEnhancer } from 'redux-devtools-extension/developmentOnly';
 import { stateStorage } from 'ts/local_storage/state_storage';
 import { reducer, State } from 'ts/redux/reducer';
 
-const ONE_SECOND = 1000;
+const ONE_SECOND_MS = 1000;
 
 export const store: ReduxStore<State> = createStore(
     reducer,
@@ -17,5 +17,5 @@ store.subscribe(
         stateStorage.saveState({
             hasPortalOnboardingBeenSeen: store.getState().hasPortalOnboardingBeenSeen,
         });
-    }, ONE_SECOND),
+    }, ONE_SECOND_MS),
 );
