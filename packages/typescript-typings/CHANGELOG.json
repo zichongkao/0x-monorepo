@@ -7,6 +7,9 @@
             },
             {
                 "note": "Remove `newman` typings as they now live in DT"
+            },
+            {
+                "note": "Remove `solc` typings as they now live in DT"
             }
         ]
     },
