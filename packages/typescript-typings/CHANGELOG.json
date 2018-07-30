@@ -24,6 +24,9 @@
                 "note": "Remove `ethereumjs-abi` typings as they now live in DT"
             },
             {
+                "note": "Remove `eth-lightwallet` typings as they now live in DT"
+            },
+            {
                 "note": "Remove `ganache-core` typings as they now live in DT"
             },
             {
