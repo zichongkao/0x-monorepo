@@ -12,6 +12,9 @@
                 "note": "Remove `solc` typings as they now live in DT"
             },
             {
+                "note": "Remove `json-rpc-error` typings as they now live in DT"
+            },
+            {
                 "note": "Remove `react-popper` typings as they now live in the package itself"
             }
         ]
