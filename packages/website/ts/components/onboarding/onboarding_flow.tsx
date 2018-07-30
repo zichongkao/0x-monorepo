@@ -1,5 +1,6 @@
+import * as PopperJS from 'popper.js';
 import * as React from 'react';
-import { Placement, Popper, PopperChildrenProps } from 'react-popper';
+import { Popper, PopperChildrenProps } from 'react-popper';
 
 import { OnboardingCard } from 'ts/components/onboarding/onboarding_card';
 import {
@@ -24,7 +25,7 @@ export interface FixedPositionSettings {
 export interface TargetPositionSettings {
     type: 'target';
     target: string;
-    placement: Placement;
+    placement: PopperJS.Placement;
 }
 
 export interface Step {
