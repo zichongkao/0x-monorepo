@@ -77,6 +77,7 @@
         "@types/mocha": "^2.2.42",
         "@types/node": "^8.0.53",
         "@types/rimraf": "^2.0.2",
+        "@types/ethereumjs-util": "^5.2.0",
         "@types/solidity-parser-antlr": "^0.2.1",
         "chai": "^4.0.1",
         "copyfiles": "^1.2.0",
