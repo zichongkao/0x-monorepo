@@ -1,5 +1,13 @@
 [
     {
+        "version": "2.0.0",
+        "changes": [
+            {
+                "note": "Remove web3 typings as unused"
+            }
+        ]
+    },
+    {
         "timestamp": 1532605697,
         "version": "1.0.2",
         "changes": [
