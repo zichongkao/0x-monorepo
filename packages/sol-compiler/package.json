@@ -58,6 +58,7 @@
         "@0xproject/tslint-config": "^1.0.3",
         "@types/mkdirp": "^0.5.2",
         "@types/require-from-string": "^1.2.0",
+        "@types/web3-eth-abi": "^1.0.0",
         "@types/semver": "^5.5.0",
         "chai": "^4.0.1",
         "chai-as-promised": "^7.1.0",
