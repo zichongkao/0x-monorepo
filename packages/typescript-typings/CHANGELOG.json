@@ -3,7 +3,10 @@
         "version": "2.0.0",
         "changes": [
             {
-                "note": "Remove web3 typings as unused"
+                "note": "Remove `web3` typings as unused"
+            },
+            {
+                "note": "Remove `newman` typings as they now live in DT"
             }
         ]
     },
