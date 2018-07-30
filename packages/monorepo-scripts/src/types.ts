@@ -39,6 +39,12 @@ export interface PackageJSON {
     version: string;
     name: string;
     main?: string;
+    dependencies?: {
+        [depName: string]: string;
+    };
+    devDependencies?: {
+        [depName: string]: string;
+    };
     scripts?: { [command: string]: string };
     config?: {
         additionalTsTypings?: string[];
