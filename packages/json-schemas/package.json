@@ -31,7 +31,8 @@
                 ],
                 "s3BucketPath": "s3://doc-jsons/json-schemas/",
                 "s3StagingBucketPath": "s3://staging-doc-jsons/json-schemas/"
-            }
+            },
+            "docOmitExports": ["schemas"]
         }
     },
     "repository": {

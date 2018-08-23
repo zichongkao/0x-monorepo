@@ -1,16 +1,49 @@
+import * as fs from 'fs';
 import lernaGetPackages = require('lerna-get-packages');
 import * as _ from 'lodash';
 import { exec as execAsync } from 'promisify-child-process';
 import semver = require('semver');
 
 import { constants } from '../constants';
-import { GitTagsByPackageName, UpdatedPackage } from '../types';
+import { GitTagsByPackageName, Package, UpdatedPackage } from '../types';
 
 import { changelogUtils } from './changelog_utils';
 
 export const utils = {
     log(...args: any[]): void {
         console.log(...args); // tslint:disable-line:no-console
+    },
+    getPackages(rootDir: string): Package[] {
+        const rootPackageJsonString = fs.readFileSync(`${rootDir}/package.json`, 'utf8');
+        const rootPackageJson = JSON.parse(rootPackageJsonString);
+        if (_.isUndefined(rootPackageJson.workspaces)) {
+            throw new Error(`Did not find 'workspaces' key in root package.json`);
+        }
+        const packages = [];
+        for (const workspace of rootPackageJson.workspaces) {
+            // HACK: Remove allowed wildcards from workspace entries.
+            // This might be entirely comprehensive.
+            const workspacePath = workspace.replace('*', '').replace('**/*', '');
+            const subpackageNames = fs.readdirSync(`${rootDir}/${workspacePath}`);
+            for (const subpackageName of subpackageNames) {
+                if (_.startsWith(subpackageName, '.')) {
+                    continue;
+                }
+                const pathToPackageJson = `${rootDir}/${workspacePath}${subpackageName}`;
+                try {
+                    const packageJsonString = fs.readFileSync(`${pathToPackageJson}/package.json`, 'utf8');
+                    const packageJson = JSON.parse(packageJsonString);
+                    const pkg = {
+                        location: pathToPackageJson,
+                        packageJson,
+                    };
+                    packages.push(pkg);
+                } catch (err) {
+                    // Couldn't find a 'package.json' for package. Skipping.
+                }
+            }
+        }
+        return packages;
     },
     async getUpdatedLernaPackagesAsync(shouldIncludePrivate: boolean): Promise<LernaPackage[]> {
         const updatedPublicPackages = await this.getLernaUpdatedPackagesAsync(shouldIncludePrivate);

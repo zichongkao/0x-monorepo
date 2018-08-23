@@ -33,7 +33,8 @@
                 ],
                 "s3BucketPath": "s3://doc-jsons/sol-cov/",
                 "s3StagingBucketPath": "s3://staging-doc-jsons/sol-cov/"
-            }
+            },
+            "docOmitExports": ["ProfilerSubprovider", "RevertTraceSubprovider"]
         }
     },
     "repository": {

@@ -28,10 +28,13 @@
         "rebuild": "run-s clean build",
         "test": "wsrun test $PKG --serial --exclude-missing",
         "stage_docs": "wsrun docs:stage $PKG --parallel --exclude-missing",
-        "lint": "wsrun lint $PKG --parallel --exclude-missing"
+        "lint": "wsrun lint $PKG --parallel --exclude-missing",
+        "generate_doc": "node ./packages/monorepo-scripts/lib/doc_generate_and_upload.js",
+        "test:generate_docs:circleci": "for i in ${npm_package_config_packagesWithDocPages}; do yarn generate_doc --package $i --shouldUpload true --isStaging true || break -1; done;"
     },
     "config": {
-        "mnemonic": "concert load couple harbor equip island argue ramp clarify fence smart topic"
+        "mnemonic": "concert load couple harbor equip island argue ramp clarify fence smart topic",
+        "packagesWithDocPages": "connect json-schemas subproviders web3-wrapper order-utils 0x.js"
     },
     "devDependencies": {
         "async-child-process": "1.1.1",
