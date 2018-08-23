@@ -43,7 +43,6 @@ contract ReentrantERC20Token is
     enum ExchangeFunction {
         FILL_ORDER,
         FILL_OR_KILL_ORDER,
-        FILL_ORDER_NO_THROW,
         BATCH_FILL_ORDERS,
         BATCH_FILL_OR_KILL_ORDERS,
         BATCH_FILL_ORDERS_NO_THROW,
@@ -107,13 +106,6 @@ contract ReentrantERC20Token is
         } else if (currentFunctionId == uint8(ExchangeFunction.FILL_OR_KILL_ORDER)) {
             calldata = abi.encodeWithSelector(
                 EXCHANGE.fillOrKillOrder.selector,
-                order,
-                0,
-                signature
-            );
-        } else if (currentFunctionId == uint8(ExchangeFunction.FILL_ORDER_NO_THROW)) {
-            calldata = abi.encodeWithSelector(
-                EXCHANGE.fillOrderNoThrow.selector,
                 order,
                 0,
                 signature

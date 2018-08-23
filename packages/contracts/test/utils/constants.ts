@@ -54,7 +54,6 @@ export const constants = {
     FUNCTIONS_WITH_MUTEX: [
         'FILL_ORDER',
         'FILL_OR_KILL_ORDER',
-        'FILL_ORDER_NO_THROW',
         'BATCH_FILL_ORDERS',
         'BATCH_FILL_OR_KILL_ORDERS',
         'BATCH_FILL_ORDERS_NO_THROW',

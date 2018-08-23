@@ -26,6 +26,7 @@ import "./libs/LibFillResults.sol";
 import "./libs/LibAbiEncoder.sol";
 import "./mixins/MExchangeCore.sol";
 import "./mixins/MWrapperFunctions.sol";
+import "./mixins/MTransactions.sol";
 
 
 contract MixinWrapperFunctions is
@@ -33,7 +34,9 @@ contract MixinWrapperFunctions is
     LibMath,
     LibFillResults,
     LibAbiEncoder,
-    MExchangeCore
+    MExchangeCore,
+    MTransactions,
+    MWrapperFunctions
 {
 
     /// @dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.
@@ -49,53 +52,42 @@ contract MixinWrapperFunctions is
         lockMutex
         returns (FillResults memory fillResults)
     {
+        address takerAddress = getCurrentContextAddress();
+
         fillResults = fillOrKillOrderInternal(
             order,
+            takerAddress,
             takerAssetFillAmount,
             signature
         );
         return fillResults;
     }
 
-    /// @dev Fills the input order.
-    ///      Returns false if the transaction would otherwise revert.
+    /// @dev Fills the input order. Only callable by this contract (for use with `fillOrderNoThrow`).
     /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
     /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
     /// @param signature Proof that order has been created by maker.
-    /// @return Amounts filled and fees paid by maker and taker.
-    function fillOrderNoThrow(
+    function fillOrderOnlyThis(
         LibOrder.Order memory order,
+        address takerAddress,
         uint256 takerAssetFillAmount,
         bytes memory signature
     )
         public
-        nonReentrant
         returns (FillResults memory fillResults)
     {
-        // ABI encode calldata for `fillOrder`
-        bytes memory fillOrderCalldata = abiEncodeFillOrder(
+        require(
+            msg.sender == address(this),
+            "INVALID_SENDER"
+        );
+
+        fillResults = fillOrderInternal(
             order,
+            takerAddress,
             takerAssetFillAmount,
             signature
         );
-
-        // Delegate to `fillOrder` and handle any exceptions gracefully
-        assembly {
-            let success := delegatecall(
-                gas,                                // forward all gas, TODO: look into gas consumption of assert/throw
-                address,                            // call address of this contract
-                add(fillOrderCalldata, 32),         // pointer to start of input (skip array length in first 32 bytes)
-                mload(fillOrderCalldata),           // length of input
-                fillOrderCalldata,                  // write output over input
-                128                                 // output size is 128 bytes
-            )
-            if success {
-                mstore(fillResults, mload(fillOrderCalldata))
-                mstore(add(fillResults, 32), mload(add(fillOrderCalldata, 32)))
-                mstore(add(fillResults, 64), mload(add(fillOrderCalldata, 64)))
-                mstore(add(fillResults, 96), mload(add(fillOrderCalldata, 96)))
-            }
-        }
         return fillResults;
     }
 
@@ -114,10 +106,13 @@ contract MixinWrapperFunctions is
         lockMutex
         returns (FillResults memory totalFillResults)
     {
+        address takerAddress = getCurrentContextAddress();
+
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
             FillResults memory singleFillResults = fillOrderInternal(
                 orders[i],
+                takerAddress,
                 takerAssetFillAmounts[i],
                 signatures[i]
             );
@@ -141,10 +136,13 @@ contract MixinWrapperFunctions is
         lockMutex
         returns (FillResults memory totalFillResults)
     {
+        address takerAddress = getCurrentContextAddress();
+
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
             FillResults memory singleFillResults = fillOrKillOrderInternal(
                 orders[i],
+                takerAddress,
                 takerAssetFillAmounts[i],
                 signatures[i]
             );
@@ -166,13 +164,16 @@ contract MixinWrapperFunctions is
         bytes[] memory signatures
     )
         public
-        nonReentrant
+        lockMutex
         returns (FillResults memory totalFillResults)
     {
+        address takerAddress = getCurrentContextAddress();
+
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
-            FillResults memory singleFillResults = fillOrderNoThrow(
+            FillResults memory singleFillResults = fillOrderNoThrowInternal(
                 orders[i],
+                takerAddress,
                 takerAssetFillAmounts[i],
                 signatures[i]
             );
@@ -196,7 +197,8 @@ contract MixinWrapperFunctions is
         returns (FillResults memory totalFillResults)
     {
         bytes memory takerAssetData = orders[0].takerAssetData;
-    
+        address takerAddress = getCurrentContextAddress();
+
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
 
@@ -210,6 +212,7 @@ contract MixinWrapperFunctions is
             // Attempt to sell the remaining amount of takerAsset
             FillResults memory singleFillResults = fillOrderInternal(
                 orders[i],
+                takerAddress,
                 remainingTakerAssetFillAmount,
                 signatures[i]
             );
@@ -237,10 +240,11 @@ contract MixinWrapperFunctions is
         bytes[] memory signatures
     )
         public
-        nonReentrant
+        lockMutex
         returns (FillResults memory totalFillResults)
     {
         bytes memory takerAssetData = orders[0].takerAssetData;
+        address takerAddress = getCurrentContextAddress();
 
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
@@ -253,8 +257,9 @@ contract MixinWrapperFunctions is
             uint256 remainingTakerAssetFillAmount = safeSub(takerAssetFillAmount, totalFillResults.takerAssetFilledAmount);
 
             // Attempt to sell the remaining amount of takerAsset
-            FillResults memory singleFillResults = fillOrderNoThrow(
+            FillResults memory singleFillResults = fillOrderNoThrowInternal(
                 orders[i],
+                takerAddress,
                 remainingTakerAssetFillAmount,
                 signatures[i]
             );
@@ -285,6 +290,7 @@ contract MixinWrapperFunctions is
         returns (FillResults memory totalFillResults)
     {
         bytes memory makerAssetData = orders[0].makerAssetData;
+        address takerAddress = getCurrentContextAddress();
 
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
@@ -307,6 +313,7 @@ contract MixinWrapperFunctions is
             // Attempt to sell the remaining amount of takerAsset
             FillResults memory singleFillResults = fillOrderInternal(
                 orders[i],
+                takerAddress,
                 remainingTakerAssetFillAmount,
                 signatures[i]
             );
@@ -334,10 +341,11 @@ contract MixinWrapperFunctions is
         bytes[] memory signatures
     )
         public
-        nonReentrant
+        lockMutex
         returns (FillResults memory totalFillResults)
     {
         bytes memory makerAssetData = orders[0].makerAssetData;
+        address takerAddress = getCurrentContextAddress();
 
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
@@ -358,8 +366,9 @@ contract MixinWrapperFunctions is
             );
 
             // Attempt to sell the remaining amount of takerAsset
-            FillResults memory singleFillResults = fillOrderNoThrow(
+            FillResults memory singleFillResults = fillOrderNoThrowInternal(
                 orders[i],
+                takerAddress,
                 remainingTakerAssetFillAmount,
                 signatures[i]
             );
@@ -404,10 +413,12 @@ contract MixinWrapperFunctions is
 
     /// @dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.
     /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
     /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
     /// @param signature Proof that order has been created by maker.
     function fillOrKillOrderInternal(
         LibOrder.Order memory order,
+        address takerAddress,
         uint256 takerAssetFillAmount,
         bytes memory signature
     )
@@ -416,6 +427,7 @@ contract MixinWrapperFunctions is
     {
         fillResults = fillOrderInternal(
             order,
+            takerAddress,
             takerAssetFillAmount,
             signature
         );
@@ -423,6 +435,51 @@ contract MixinWrapperFunctions is
             fillResults.takerAssetFilledAmount == takerAssetFillAmount,
             "COMPLETE_FILL_FAILED"
         );
+        return fillResults;
+    }
+
+    /// @dev Fills the input order.
+    ///      Returns false if the transaction would otherwise revert.
+    /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
+    /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
+    /// @param signature Proof that order has been created by maker.
+    /// @return Amounts filled and fees paid by maker and taker.
+    function fillOrderNoThrowInternal(
+        LibOrder.Order memory order,
+        address takerAddress,
+        uint256 takerAssetFillAmount,
+        bytes memory signature
+    )
+        internal
+        returns (FillResults memory fillResults)
+    {
+        // ABI encode calldata for `fillOrderOnlyThis`
+        bytes memory fillOrderCalldata = abiEncodeFillOrderOnlyThis(
+            order,
+            takerAddress,
+            takerAssetFillAmount,
+            signature
+        );
+
+        // Call `fillOrderOnlyThis` and handle any exceptions gracefully
+        assembly {
+            let success := call(
+                gas,                                // forward all gas, TODO: look into gas consumption of assert/throw
+                address,                            // call address of this contract
+                0,                                  // transfer 0 wei
+                add(fillOrderCalldata, 32),         // pointer to start of input (skip array length in first 32 bytes)
+                mload(fillOrderCalldata),           // length of input
+                fillOrderCalldata,                  // write output over input
+                128                                 // output size is 128 bytes
+            )
+            if success {
+                mstore(fillResults, mload(fillOrderCalldata))
+                mstore(add(fillResults, 32), mload(add(fillOrderCalldata, 32)))
+                mstore(add(fillResults, 64), mload(add(fillOrderCalldata, 64)))
+                mstore(add(fillResults, 96), mload(add(fillOrderCalldata, 96)))
+            }
+        }
         return fillResults;
     }
 }

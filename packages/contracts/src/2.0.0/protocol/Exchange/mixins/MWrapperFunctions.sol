@@ -24,14 +24,34 @@ import "../libs/LibFillResults.sol";
 import "../interfaces/IWrapperFunctions.sol";
 
 
-contract MWrapperFunctions {
+contract MWrapperFunctions is
+    IWrapperFunctions
+{
 
     /// @dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.
     /// @param order LibOrder.Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
     /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
     /// @param signature Proof that order has been created by maker.
     function fillOrKillOrderInternal(
         LibOrder.Order memory order,
+        address takerAddress,
+        uint256 takerAssetFillAmount,
+        bytes memory signature
+    )
+        internal
+        returns (LibFillResults.FillResults memory fillResults);
+
+    /// @dev Fills the input order.
+    ///      Returns false if the transaction would otherwise revert.
+    /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
+    /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
+    /// @param signature Proof that order has been created by maker.
+    /// @return Amounts filled and fees paid by maker and taker.
+    function fillOrderNoThrowInternal(
+        LibOrder.Order memory order,
+        address takerAddress,
         uint256 takerAssetFillAmount,
         bytes memory signature
     )

@@ -55,21 +55,21 @@ export class ExchangeWrapper {
         const tx = await this._logDecoder.getTxWithDecodedLogsAsync(txHash);
         return tx;
     }
-    public async fillOrderNoThrowAsync(
-        signedOrder: SignedOrder,
-        from: string,
-        opts: { takerAssetFillAmount?: BigNumber; gas?: number } = {},
-    ): Promise<TransactionReceiptWithDecodedLogs> {
-        const params = orderUtils.createFill(signedOrder, opts.takerAssetFillAmount);
-        const txHash = await this._exchange.fillOrderNoThrow.sendTransactionAsync(
-            params.order,
-            params.takerAssetFillAmount,
-            params.signature,
-            { from, gas: opts.gas },
-        );
-        const tx = await this._logDecoder.getTxWithDecodedLogsAsync(txHash);
-        return tx;
-    }
+    // public async fillOrderNoThrowAsync(
+    //     signedOrder: SignedOrder,
+    //     from: string,
+    //     opts: { takerAssetFillAmount?: BigNumber; gas?: number } = {},
+    // ): Promise<TransactionReceiptWithDecodedLogs> {
+    //     const params = orderUtils.createFill(signedOrder, opts.takerAssetFillAmount);
+    //     const txHash = await this._exchange.fillOrderNoThrow.sendTransactionAsync(
+    //         params.order,
+    //         params.takerAssetFillAmount,
+    //         params.signature,
+    //         { from, gas: opts.gas },
+    //     );
+    //     const tx = await this._logDecoder.getTxWithDecodedLogsAsync(txHash);
+    //     return tx;
+    // }
     public async batchFillOrdersAsync(
         orders: SignedOrder[],
         from: string,

@@ -225,214 +225,214 @@ describe('Exchange wrappers', () => {
         });
     });
 
-    describe('fillOrderNoThrow', () => {
-        const reentrancyTest = (functionNames: string[]) => {
-            _.forEach(functionNames, async (functionName: string, functionId: number) => {
-                const description = `should not allow fillOrderNoThrow to reenter the Exchange contract via ${functionName}`;
-                it(description, async () => {
-                    const signedOrder = await orderFactory.newSignedOrderAsync({
-                        makerAssetData: assetDataUtils.encodeERC20AssetData(reentrantErc20Token.address),
-                    });
-                    await web3Wrapper.awaitTransactionSuccessAsync(
-                        await reentrantErc20Token.setCurrentFunction.sendTransactionAsync(functionId),
-                        constants.AWAIT_TRANSACTION_MINED_MS,
-                    );
-                    await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-                    const newBalances = await erc20Wrapper.getBalancesAsync();
-                    expect(erc20Balances).to.deep.equal(newBalances);
-                });
-            });
-        };
-        describe('fillOrderNoThrow reentrancy tests', () => reentrancyTest(constants.FUNCTIONS_WITH_MUTEX));
+    // describe('fillOrderNoThrow', () => {
+    //     const reentrancyTest = (functionNames: string[]) => {
+    //         _.forEach(functionNames, async (functionName: string, functionId: number) => {
+    //             const description = `should not allow fillOrderNoThrow to reenter the Exchange contract via ${functionName}`;
+    //             it(description, async () => {
+    //                 const signedOrder = await orderFactory.newSignedOrderAsync({
+    //                     makerAssetData: assetDataUtils.encodeERC20AssetData(reentrantErc20Token.address),
+    //                 });
+    //                 await web3Wrapper.awaitTransactionSuccessAsync(
+    //                     await reentrantErc20Token.setCurrentFunction.sendTransactionAsync(functionId),
+    //                     constants.AWAIT_TRANSACTION_MINED_MS,
+    //                 );
+    //                 await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //                 const newBalances = await erc20Wrapper.getBalancesAsync();
+    //                 expect(erc20Balances).to.deep.equal(newBalances);
+    //             });
+    //         });
+    //     };
+    //     describe('fillOrderNoThrow reentrancy tests', () => reentrancyTest(constants.FUNCTIONS_WITH_MUTEX));
 
-        it('should transfer the correct amounts', async () => {
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                makerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 18),
-                takerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(200), 18),
-            });
-            const takerAssetFillAmount = signedOrder.takerAssetAmount.div(2);
+    //     it('should transfer the correct amounts', async () => {
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             makerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100), 18),
+    //             takerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(200), 18),
+    //         });
+    //         const takerAssetFillAmount = signedOrder.takerAssetAmount.div(2);
 
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress, {
-                takerAssetFillAmount,
-                // HACK(albrow): We need to hardcode the gas estimate here because
-                // the Geth gas estimator doesn't work with the way we use
-                // delegatecall and swallow errors.
-                gas: 250000,
-            });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress, {
+    //             takerAssetFillAmount,
+    //             // HACK(albrow): We need to hardcode the gas estimate here because
+    //             // the Geth gas estimator doesn't work with the way we use
+    //             // delegatecall and swallow errors.
+    //             gas: 250000,
+    //         });
 
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            const makerAssetFilledAmount = takerAssetFillAmount
-                .times(signedOrder.makerAssetAmount)
-                .dividedToIntegerBy(signedOrder.takerAssetAmount);
-            const makerFee = signedOrder.makerFee
-                .times(makerAssetFilledAmount)
-                .dividedToIntegerBy(signedOrder.makerAssetAmount);
-            const takerFee = signedOrder.takerFee
-                .times(makerAssetFilledAmount)
-                .dividedToIntegerBy(signedOrder.makerAssetAmount);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         const makerAssetFilledAmount = takerAssetFillAmount
+    //             .times(signedOrder.makerAssetAmount)
+    //             .dividedToIntegerBy(signedOrder.takerAssetAmount);
+    //         const makerFee = signedOrder.makerFee
+    //             .times(makerAssetFilledAmount)
+    //             .dividedToIntegerBy(signedOrder.makerAssetAmount);
+    //         const takerFee = signedOrder.takerFee
+    //             .times(makerAssetFilledAmount)
+    //             .dividedToIntegerBy(signedOrder.makerAssetAmount);
 
-            expect(newBalances[makerAddress][defaultMakerAssetAddress]).to.be.bignumber.equal(
-                erc20Balances[makerAddress][defaultMakerAssetAddress].minus(makerAssetFilledAmount),
-            );
-            expect(newBalances[makerAddress][defaultTakerAssetAddress]).to.be.bignumber.equal(
-                erc20Balances[makerAddress][defaultTakerAssetAddress].add(takerAssetFillAmount),
-            );
-            expect(newBalances[makerAddress][zrxToken.address]).to.be.bignumber.equal(
-                erc20Balances[makerAddress][zrxToken.address].minus(makerFee),
-            );
-            expect(newBalances[takerAddress][defaultTakerAssetAddress]).to.be.bignumber.equal(
-                erc20Balances[takerAddress][defaultTakerAssetAddress].minus(takerAssetFillAmount),
-            );
-            expect(newBalances[takerAddress][defaultMakerAssetAddress]).to.be.bignumber.equal(
-                erc20Balances[takerAddress][defaultMakerAssetAddress].add(makerAssetFilledAmount),
-            );
-            expect(newBalances[takerAddress][zrxToken.address]).to.be.bignumber.equal(
-                erc20Balances[takerAddress][zrxToken.address].minus(takerFee),
-            );
-            expect(newBalances[feeRecipientAddress][zrxToken.address]).to.be.bignumber.equal(
-                erc20Balances[feeRecipientAddress][zrxToken.address].add(makerFee.add(takerFee)),
-            );
-        });
+    //         expect(newBalances[makerAddress][defaultMakerAssetAddress]).to.be.bignumber.equal(
+    //             erc20Balances[makerAddress][defaultMakerAssetAddress].minus(makerAssetFilledAmount),
+    //         );
+    //         expect(newBalances[makerAddress][defaultTakerAssetAddress]).to.be.bignumber.equal(
+    //             erc20Balances[makerAddress][defaultTakerAssetAddress].add(takerAssetFillAmount),
+    //         );
+    //         expect(newBalances[makerAddress][zrxToken.address]).to.be.bignumber.equal(
+    //             erc20Balances[makerAddress][zrxToken.address].minus(makerFee),
+    //         );
+    //         expect(newBalances[takerAddress][defaultTakerAssetAddress]).to.be.bignumber.equal(
+    //             erc20Balances[takerAddress][defaultTakerAssetAddress].minus(takerAssetFillAmount),
+    //         );
+    //         expect(newBalances[takerAddress][defaultMakerAssetAddress]).to.be.bignumber.equal(
+    //             erc20Balances[takerAddress][defaultMakerAssetAddress].add(makerAssetFilledAmount),
+    //         );
+    //         expect(newBalances[takerAddress][zrxToken.address]).to.be.bignumber.equal(
+    //             erc20Balances[takerAddress][zrxToken.address].minus(takerFee),
+    //         );
+    //         expect(newBalances[feeRecipientAddress][zrxToken.address]).to.be.bignumber.equal(
+    //             erc20Balances[feeRecipientAddress][zrxToken.address].add(makerFee.add(takerFee)),
+    //         );
+    //     });
 
-        it('should not change erc20Balances if maker erc20Balances are too low to fill order', async () => {
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                makerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100000), 18),
-            });
+    //     it('should not change erc20Balances if maker erc20Balances are too low to fill order', async () => {
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             makerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100000), 18),
+    //         });
 
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if taker erc20Balances are too low to fill order', async () => {
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                takerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100000), 18),
-            });
+    //     it('should not change erc20Balances if taker erc20Balances are too low to fill order', async () => {
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             takerAssetAmount: Web3Wrapper.toBaseUnitAmount(new BigNumber(100000), 18),
+    //         });
 
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if maker allowances are too low to fill order', async () => {
-            const signedOrder = await orderFactory.newSignedOrderAsync();
-            await web3Wrapper.awaitTransactionSuccessAsync(
-                await erc20TokenA.approve.sendTransactionAsync(erc20Proxy.address, new BigNumber(0), {
-                    from: makerAddress,
-                }),
-                constants.AWAIT_TRANSACTION_MINED_MS,
-            );
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            await web3Wrapper.awaitTransactionSuccessAsync(
-                await erc20TokenA.approve.sendTransactionAsync(erc20Proxy.address, constants.INITIAL_ERC20_ALLOWANCE, {
-                    from: makerAddress,
-                }),
-                constants.AWAIT_TRANSACTION_MINED_MS,
-            );
+    //     it('should not change erc20Balances if maker allowances are too low to fill order', async () => {
+    //         const signedOrder = await orderFactory.newSignedOrderAsync();
+    //         await web3Wrapper.awaitTransactionSuccessAsync(
+    //             await erc20TokenA.approve.sendTransactionAsync(erc20Proxy.address, new BigNumber(0), {
+    //                 from: makerAddress,
+    //             }),
+    //             constants.AWAIT_TRANSACTION_MINED_MS,
+    //         );
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         await web3Wrapper.awaitTransactionSuccessAsync(
+    //             await erc20TokenA.approve.sendTransactionAsync(erc20Proxy.address, constants.INITIAL_ERC20_ALLOWANCE, {
+    //                 from: makerAddress,
+    //             }),
+    //             constants.AWAIT_TRANSACTION_MINED_MS,
+    //         );
 
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if taker allowances are too low to fill order', async () => {
-            const signedOrder = await orderFactory.newSignedOrderAsync();
-            await web3Wrapper.awaitTransactionSuccessAsync(
-                await erc20TokenB.approve.sendTransactionAsync(erc20Proxy.address, new BigNumber(0), {
-                    from: takerAddress,
-                }),
-                constants.AWAIT_TRANSACTION_MINED_MS,
-            );
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            await web3Wrapper.awaitTransactionSuccessAsync(
-                await erc20TokenB.approve.sendTransactionAsync(erc20Proxy.address, constants.INITIAL_ERC20_ALLOWANCE, {
-                    from: takerAddress,
-                }),
-                constants.AWAIT_TRANSACTION_MINED_MS,
-            );
+    //     it('should not change erc20Balances if taker allowances are too low to fill order', async () => {
+    //         const signedOrder = await orderFactory.newSignedOrderAsync();
+    //         await web3Wrapper.awaitTransactionSuccessAsync(
+    //             await erc20TokenB.approve.sendTransactionAsync(erc20Proxy.address, new BigNumber(0), {
+    //                 from: takerAddress,
+    //             }),
+    //             constants.AWAIT_TRANSACTION_MINED_MS,
+    //         );
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         await web3Wrapper.awaitTransactionSuccessAsync(
+    //             await erc20TokenB.approve.sendTransactionAsync(erc20Proxy.address, constants.INITIAL_ERC20_ALLOWANCE, {
+    //                 from: takerAddress,
+    //             }),
+    //             constants.AWAIT_TRANSACTION_MINED_MS,
+    //         );
 
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if makerAssetAddress is ZRX, makerAssetAmount + makerFee > maker balance', async () => {
-            const makerZRXBalance = new BigNumber(erc20Balances[makerAddress][zrxToken.address]);
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                makerAssetAmount: makerZRXBalance,
-                makerFee: new BigNumber(1),
-                makerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
-            });
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //     it('should not change erc20Balances if makerAssetAddress is ZRX, makerAssetAmount + makerFee > maker balance', async () => {
+    //         const makerZRXBalance = new BigNumber(erc20Balances[makerAddress][zrxToken.address]);
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             makerAssetAmount: makerZRXBalance,
+    //             makerFee: new BigNumber(1),
+    //             makerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
+    //         });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if makerAssetAddress is ZRX, makerAssetAmount + makerFee > maker allowance', async () => {
-            const makerZRXAllowance = await zrxToken.allowance.callAsync(makerAddress, erc20Proxy.address);
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                makerAssetAmount: new BigNumber(makerZRXAllowance),
-                makerFee: new BigNumber(1),
-                makerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
-            });
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //     it('should not change erc20Balances if makerAssetAddress is ZRX, makerAssetAmount + makerFee > maker allowance', async () => {
+    //         const makerZRXAllowance = await zrxToken.allowance.callAsync(makerAddress, erc20Proxy.address);
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             makerAssetAmount: new BigNumber(makerZRXAllowance),
+    //             makerFee: new BigNumber(1),
+    //             makerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
+    //         });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if takerAssetAddress is ZRX, takerAssetAmount + takerFee > taker balance', async () => {
-            const takerZRXBalance = new BigNumber(erc20Balances[takerAddress][zrxToken.address]);
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                takerAssetAmount: takerZRXBalance,
-                takerFee: new BigNumber(1),
-                takerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
-            });
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //     it('should not change erc20Balances if takerAssetAddress is ZRX, takerAssetAmount + takerFee > taker balance', async () => {
+    //         const takerZRXBalance = new BigNumber(erc20Balances[takerAddress][zrxToken.address]);
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             takerAssetAmount: takerZRXBalance,
+    //             takerFee: new BigNumber(1),
+    //             takerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
+    //         });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should not change erc20Balances if takerAssetAddress is ZRX, takerAssetAmount + takerFee > taker allowance', async () => {
-            const takerZRXAllowance = await zrxToken.allowance.callAsync(takerAddress, erc20Proxy.address);
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                takerAssetAmount: new BigNumber(takerZRXAllowance),
-                takerFee: new BigNumber(1),
-                takerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
-            });
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
-            const newBalances = await erc20Wrapper.getBalancesAsync();
-            expect(newBalances).to.be.deep.equal(erc20Balances);
-        });
+    //     it('should not change erc20Balances if takerAssetAddress is ZRX, takerAssetAmount + takerFee > taker allowance', async () => {
+    //         const takerZRXAllowance = await zrxToken.allowance.callAsync(takerAddress, erc20Proxy.address);
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             takerAssetAmount: new BigNumber(takerZRXAllowance),
+    //             takerFee: new BigNumber(1),
+    //             takerAssetData: assetDataUtils.encodeERC20AssetData(zrxToken.address),
+    //         });
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress);
+    //         const newBalances = await erc20Wrapper.getBalancesAsync();
+    //         expect(newBalances).to.be.deep.equal(erc20Balances);
+    //     });
 
-        it('should successfully exchange ERC721 tokens', async () => {
-            // Construct Exchange parameters
-            const makerAssetId = erc721MakerAssetId;
-            const takerAssetId = erc721TakerAssetId;
-            const signedOrder = await orderFactory.newSignedOrderAsync({
-                makerAssetAmount: new BigNumber(1),
-                takerAssetAmount: new BigNumber(1),
-                makerAssetData: assetDataUtils.encodeERC721AssetData(erc721Token.address, makerAssetId),
-                takerAssetData: assetDataUtils.encodeERC721AssetData(erc721Token.address, takerAssetId),
-            });
-            // Verify pre-conditions
-            const initialOwnerMakerAsset = await erc721Token.ownerOf.callAsync(makerAssetId);
-            expect(initialOwnerMakerAsset).to.be.bignumber.equal(makerAddress);
-            const initialOwnerTakerAsset = await erc721Token.ownerOf.callAsync(takerAssetId);
-            expect(initialOwnerTakerAsset).to.be.bignumber.equal(takerAddress);
-            // Call Exchange
-            const takerAssetFillAmount = signedOrder.takerAssetAmount;
-            await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress, {
-                takerAssetFillAmount,
-                // HACK(albrow): We need to hardcode the gas estimate here because
-                // the Geth gas estimator doesn't work with the way we use
-                // delegatecall and swallow errors.
-                gas: 280000,
-            });
-            // Verify post-conditions
-            const newOwnerMakerAsset = await erc721Token.ownerOf.callAsync(makerAssetId);
-            expect(newOwnerMakerAsset).to.be.bignumber.equal(takerAddress);
-            const newOwnerTakerAsset = await erc721Token.ownerOf.callAsync(takerAssetId);
-            expect(newOwnerTakerAsset).to.be.bignumber.equal(makerAddress);
-        });
-    });
+    //     it('should successfully exchange ERC721 tokens', async () => {
+    //         // Construct Exchange parameters
+    //         const makerAssetId = erc721MakerAssetId;
+    //         const takerAssetId = erc721TakerAssetId;
+    //         const signedOrder = await orderFactory.newSignedOrderAsync({
+    //             makerAssetAmount: new BigNumber(1),
+    //             takerAssetAmount: new BigNumber(1),
+    //             makerAssetData: assetDataUtils.encodeERC721AssetData(erc721Token.address, makerAssetId),
+    //             takerAssetData: assetDataUtils.encodeERC721AssetData(erc721Token.address, takerAssetId),
+    //         });
+    //         // Verify pre-conditions
+    //         const initialOwnerMakerAsset = await erc721Token.ownerOf.callAsync(makerAssetId);
+    //         expect(initialOwnerMakerAsset).to.be.bignumber.equal(makerAddress);
+    //         const initialOwnerTakerAsset = await erc721Token.ownerOf.callAsync(takerAssetId);
+    //         expect(initialOwnerTakerAsset).to.be.bignumber.equal(takerAddress);
+    //         // Call Exchange
+    //         const takerAssetFillAmount = signedOrder.takerAssetAmount;
+    //         await exchangeWrapper.fillOrderNoThrowAsync(signedOrder, takerAddress, {
+    //             takerAssetFillAmount,
+    //             // HACK(albrow): We need to hardcode the gas estimate here because
+    //             // the Geth gas estimator doesn't work with the way we use
+    //             // delegatecall and swallow errors.
+    //             gas: 280000,
+    //         });
+    //         // Verify post-conditions
+    //         const newOwnerMakerAsset = await erc721Token.ownerOf.callAsync(makerAssetId);
+    //         expect(newOwnerMakerAsset).to.be.bignumber.equal(takerAddress);
+    //         const newOwnerTakerAsset = await erc721Token.ownerOf.callAsync(takerAssetId);
+    //         expect(newOwnerTakerAsset).to.be.bignumber.equal(makerAddress);
+    //     });
+    // });
 
     describe('batch functions', () => {
         let signedOrders: SignedOrder[];

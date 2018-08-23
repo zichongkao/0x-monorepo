@@ -92,8 +92,10 @@ contract MixinExchangeCore is
         lockMutex
         returns (FillResults memory fillResults)
     {
+        address takerAddress = getCurrentContextAddress();
         fillResults = fillOrderInternal(
             order,
+            takerAddress,
             takerAssetFillAmount,
             signature
         );
@@ -180,11 +182,13 @@ contract MixinExchangeCore is
 
     /// @dev Fills the input order.
     /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
     /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
     /// @param signature Proof that order has been created by maker.
     /// @return Amounts filled and fees paid by maker and taker.
     function fillOrderInternal(
         Order memory order,
+        address takerAddress,
         uint256 takerAssetFillAmount,
         bytes memory signature
     )
@@ -193,9 +197,6 @@ contract MixinExchangeCore is
     {
         // Fetch order info
         OrderInfo memory orderInfo = getOrderInfo(order);
-
-        // Fetch taker address
-        address takerAddress = getCurrentContextAddress();
 
         // Get amount of takerAsset to fill
         uint256 remainingTakerAssetAmount = safeSub(order.takerAssetAmount, orderInfo.orderTakerAssetFilledAmount);

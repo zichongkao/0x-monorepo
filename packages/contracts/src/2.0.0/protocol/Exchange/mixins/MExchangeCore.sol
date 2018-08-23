@@ -61,11 +61,13 @@ contract MExchangeCore is
 
     /// @dev Fills the input order.
     /// @param order Order struct containing order specifications.
+    /// @param takerAddress Address that is filling the order.
     /// @param takerAssetFillAmount Desired amount of takerAsset to sell.
     /// @param signature Proof that order has been created by maker.
     /// @return Amounts filled and fees paid by maker and taker.
     function fillOrderInternal(
         LibOrder.Order memory order,
+        address takerAddress,
         uint256 takerAssetFillAmount,
         bytes memory signature
     )
