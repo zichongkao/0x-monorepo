@@ -1,5 +1,13 @@
 [
     {
+        "version": "2.0.0",
+        "changes": [
+            {
+                "note": "Added contract artifacts for Protocol V2"
+            }
+        ]
+    },
+    {
         "timestamp": 1535377027,
         "version": "1.0.6",
         "changes": [
