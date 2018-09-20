@@ -1,13 +1,11 @@
 import { BigNumber } from '@0xproject/utils';
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import forEach = require('lodash.foreach');
 import 'mocha';
 
 import { schemas, SchemaValidator } from '../src/index';
 
 chai.config.includeStack = true;
-chai.use(dirtyChai);
 const expect = chai.expect;
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 const {

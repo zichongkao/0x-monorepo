@@ -24,12 +24,12 @@ describe('Web3Wrapper tests', () => {
     });
     describe('#isAddress', () => {
         it('correctly checks if a string is a valid ethereum address', () => {
-            expect(Web3Wrapper.isAddress('0x0')).to.be.false();
-            expect(Web3Wrapper.isAddress('0xdeadbeef')).to.be.false();
-            expect(Web3Wrapper.isAddress('42')).to.be.false();
-            expect(Web3Wrapper.isAddress('weth.thetoken.eth')).to.be.false();
-            expect(Web3Wrapper.isAddress('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')).to.be.true();
-            expect(Web3Wrapper.isAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')).to.be.true();
+            expect(Web3Wrapper.isAddress('0x0')).to.be.false;
+            expect(Web3Wrapper.isAddress('0xdeadbeef')).to.be.false;
+            expect(Web3Wrapper.isAddress('42')).to.be.false;
+            expect(Web3Wrapper.isAddress('weth.thetoken.eth')).to.be.false;
+            expect(Web3Wrapper.isAddress('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')).to.be.true;
+            expect(Web3Wrapper.isAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')).to.be.true;
         });
     });
     describe('#getNodeVersionAsync', () => {
@@ -67,7 +67,7 @@ describe('Web3Wrapper tests', () => {
         });
         it('should throw if supplied owner not an Ethereum address hex string', async () => {
             const invalidEthAddress = 'deadbeef';
-            expect(web3Wrapper.getBalanceInWeiAsync(invalidEthAddress)).to.eventually.to.be.rejected();
+            expect(web3Wrapper.getBalanceInWeiAsync(invalidEthAddress)).to.be.rejected();
         });
     });
     describe('#signMessageAsync', () => {
@@ -106,7 +106,7 @@ describe('Web3Wrapper tests', () => {
         });
         it('should throw if supplied invalid blockParam value', async () => {
             const invalidBlockParam = 'deadbeef';
-            expect(web3Wrapper.getBlockAsync(invalidBlockParam)).to.eventually.to.be.rejected();
+            expect(web3Wrapper.getBlockAsync(invalidBlockParam)).to.be.rejected();
         });
     });
     describe('#getBlockWithTransactionDataAsync', () => {
@@ -119,7 +119,7 @@ describe('Web3Wrapper tests', () => {
         });
         it('should throw if supplied invalid blockParam value', async () => {
             const invalidBlockParam = 'deadbeef';
-            expect(web3Wrapper.getBlockWithTransactionDataAsync(invalidBlockParam)).to.eventually.to.be.rejected();
+            expect(web3Wrapper.getBlockWithTransactionDataAsync(invalidBlockParam)).to.be.rejected();
         });
     });
     describe('#getBlockTimestampAsync', () => {

@@ -65,7 +65,7 @@ describe('ForwarderHelperImpl', () => {
         });
         it('sorts remainingFillableMakerAssetAmounts', () => {
             const forwarderHelper = new ForwarderHelperImpl(inputForwarderHelperConfig);
-            expect(forwarderHelper.config.remainingFillableMakerAssetAmounts).to.be.not.undefined();
+            expect(forwarderHelper.config.remainingFillableMakerAssetAmounts).to.be.not.undefined;
             expect(_.nth(forwarderHelper.config.remainingFillableMakerAssetAmounts, 0)).to.bignumber.equal(
                 new BigNumber(2),
             );
@@ -78,18 +78,18 @@ describe('ForwarderHelperImpl', () => {
         });
         it('sorts remainingFillableFeeAmounts', () => {
             const forwarderHelper = new ForwarderHelperImpl(inputForwarderHelperConfig);
-            expect(forwarderHelper.config.remainingFillableFeeAmounts).to.be.not.undefined();
+            expect(forwarderHelper.config.remainingFillableFeeAmounts).to.be.not.undefined;
             expect(_.nth(forwarderHelper.config.remainingFillableFeeAmounts, 0)).to.bignumber.equal(new BigNumber(6));
             expect(_.nth(forwarderHelper.config.remainingFillableFeeAmounts, 1)).to.bignumber.equal(new BigNumber(5));
             expect(_.nth(forwarderHelper.config.remainingFillableFeeAmounts, 2)).to.bignumber.equal(new BigNumber(4));
         });
         it('remainingFillableMakerAssetAmounts is undefined if none provided', () => {
             const forwarderHelper = new ForwarderHelperImpl(inputForwarderHelperConfigNoRemainingAmounts);
-            expect(forwarderHelper.config.remainingFillableMakerAssetAmounts).to.be.undefined();
+            expect(forwarderHelper.config.remainingFillableMakerAssetAmounts).to.be.undefined;
         });
         it('remainingFillableFeeAmounts is undefined if none provided', () => {
             const forwarderHelper = new ForwarderHelperImpl(inputForwarderHelperConfigNoRemainingAmounts);
-            expect(forwarderHelper.config.remainingFillableFeeAmounts).to.be.undefined();
+            expect(forwarderHelper.config.remainingFillableFeeAmounts).to.be.undefined;
         });
     });
     describe('#getMarketBuyOrdersInfo', () => {

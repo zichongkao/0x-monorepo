@@ -55,7 +55,7 @@ describe('Authorizable', () => {
                 constants.AWAIT_TRANSACTION_MINED_MS,
             );
             const isAuthorized = await authorizable.authorized.callAsync(address);
-            expect(isAuthorized).to.be.true();
+            expect(isAuthorized).to.be.true;
         });
         it('should throw if owner attempts to authorize a duplicate address', async () => {
             await web3Wrapper.awaitTransactionSuccessAsync(
@@ -95,7 +95,7 @@ describe('Authorizable', () => {
                 constants.AWAIT_TRANSACTION_MINED_MS,
             );
             const isAuthorized = await authorizable.authorized.callAsync(address);
-            expect(isAuthorized).to.be.false();
+            expect(isAuthorized).to.be.false;
         });
 
         it('should throw if owner attempts to remove an address that is not authorized', async () => {
@@ -176,7 +176,7 @@ describe('Authorizable', () => {
                 constants.AWAIT_TRANSACTION_MINED_MS,
             );
             const isAuthorized = await authorizable.authorized.callAsync(address);
-            expect(isAuthorized).to.be.false();
+            expect(isAuthorized).to.be.false;
         });
     });
 

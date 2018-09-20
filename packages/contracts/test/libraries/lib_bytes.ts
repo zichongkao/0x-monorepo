@@ -152,48 +152,48 @@ describe('LibBytes', () => {
                 byteArrayShorterThan32Bytes,
                 byteArrayShorterThan32Bytes,
             );
-            return expect(isEqual).to.be.true();
+            return expect(isEqual).to.be.true;
         });
         it('should return true if byte arrays are equal (both arrays > 32 bytes)', async () => {
             const isEqual = await libBytes.publicEquals.callAsync(
                 byteArrayLongerThan32Bytes,
                 byteArrayLongerThan32Bytes,
             );
-            return expect(isEqual).to.be.true();
+            return expect(isEqual).to.be.true;
         });
         it('should return false if byte arrays are not equal (first array < 32 bytes, second array > 32 bytes)', async () => {
             const isEqual = await libBytes.publicEquals.callAsync(
                 byteArrayShorterThan32Bytes,
                 byteArrayLongerThan32Bytes,
             );
-            return expect(isEqual).to.be.false();
+            return expect(isEqual).to.be.false;
         });
         it('should return false if byte arrays are not equal (first array > 32 bytes, second array < 32 bytes)', async () => {
             const isEqual = await libBytes.publicEquals.callAsync(
                 byteArrayLongerThan32Bytes,
                 byteArrayShorterThan32Bytes,
             );
-            return expect(isEqual).to.be.false();
+            return expect(isEqual).to.be.false;
         });
         it('should return false if byte arrays are not equal (same length, but a byte in first word differs)', async () => {
             const isEqual = await libBytes.publicEquals.callAsync(
                 byteArrayLongerThan32BytesFirstBytesSwapped,
                 byteArrayLongerThan32Bytes,
             );
-            return expect(isEqual).to.be.false();
+            return expect(isEqual).to.be.false;
         });
         it('should return false if byte arrays are not equal (same length, but a byte in last word differs)', async () => {
             const isEqual = await libBytes.publicEquals.callAsync(
                 byteArrayLongerThan32BytesLastBytesSwapped,
                 byteArrayLongerThan32Bytes,
             );
-            return expect(isEqual).to.be.false();
+            return expect(isEqual).to.be.false;
         });
 
         describe('should ignore trailing data', () => {
             it('should return true when both < 32 bytes', async () => {
                 const isEqual = await libBytes.publicEqualsPop1.callAsync('0x0102', '0x0103');
-                return expect(isEqual).to.be.true();
+                return expect(isEqual).to.be.true;
             });
         });
     });

@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import * as _ from 'lodash';
 import 'mocha';
 
@@ -11,7 +10,6 @@ import {
 } from '../src/utils/compiler';
 import { fsWrapper } from '../src/utils/fs_wrapper';
 
-chai.use(dirtyChai);
 const expect = chai.expect;
 
 describe('Compiler utils', () => {
@@ -25,11 +23,11 @@ describe('Compiler utils', () => {
     describe('#createDirIfDoesNotExistAsync', () => {
         it('creates artifacts dir', async () => {
             const artifactsDir = `${__dirname}/artifacts`;
-            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.false();
+            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.false;
             await createDirIfDoesNotExistAsync(artifactsDir);
-            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.true();
+            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.true;
             fsWrapper.rmdirSync(artifactsDir);
-            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.false();
+            expect(fsWrapper.doesPathExistSync(artifactsDir)).to.be.false;
         });
     });
     describe('#parseSolidityVersionRange', () => {
@@ -60,7 +58,7 @@ describe('Compiler utils', () => {
             ];
             _.each(expectedDependencies, expectedDepdency => {
                 const foundDependency = _.find(dependencies, dependency => _.endsWith(dependency, expectedDepdency));
-                expect(foundDependency, `${expectedDepdency} not found`).to.not.be.undefined();
+                expect(foundDependency, `${expectedDepdency} not found`).to.not.be.undefined;
             });
         });
         it('correctly parses TokenTransferProxy dependencies', async () => {

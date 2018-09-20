@@ -48,16 +48,16 @@ describe('Order hashing', () => {
     describe('#isValidOrderHash', () => {
         it('returns false if the value is not a hex string', () => {
             const isValid = orderHashUtils.isValidOrderHash('not a hex');
-            expect(isValid).to.be.false();
+            expect(isValid).to.be.false;
         });
         it('returns false if the length is wrong', () => {
             const isValid = orderHashUtils.isValidOrderHash('0xdeadbeef');
-            expect(isValid).to.be.false();
+            expect(isValid).to.be.false;
         });
         it('returns true if order hash is correct', () => {
             const orderHashLength = 65;
             const isValid = orderHashUtils.isValidOrderHash('0x' + Array(orderHashLength).join('0'));
-            expect(isValid).to.be.true();
+            expect(isValid).to.be.true;
         });
     });
 });

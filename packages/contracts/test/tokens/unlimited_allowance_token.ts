@@ -81,7 +81,7 @@ describe('UnlimitedAllowanceToken', () => {
             const didReturnTrue = await token.transfer.callAsync(spender, new BigNumber(0), {
                 from: owner,
             });
-            expect(didReturnTrue).to.be.true();
+            expect(didReturnTrue).to.be.true;
         });
     });
 
@@ -107,7 +107,7 @@ describe('UnlimitedAllowanceToken', () => {
 
             const spenderAllowance = await token.allowance.callAsync(owner, spender);
             const isSpenderAllowanceInsufficient = spenderAllowance.cmp(amountToTransfer) < 0;
-            expect(isSpenderAllowanceInsufficient).to.be.true();
+            expect(isSpenderAllowanceInsufficient).to.be.true;
 
             return expectContractCallFailedAsync(
                 token.transferFrom.callAsync(owner, spender, amountToTransfer, {
@@ -122,7 +122,7 @@ describe('UnlimitedAllowanceToken', () => {
             const didReturnTrue = await token.transferFrom.callAsync(owner, spender, amountToTransfer, {
                 from: spender,
             });
-            expect(didReturnTrue).to.be.true();
+            expect(didReturnTrue).to.be.true;
         });
 
         it('should not modify spender allowance if spender allowance is 2^256 - 1', async () => {

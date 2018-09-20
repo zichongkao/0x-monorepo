@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import * as fs from 'fs';
 import 'mocha';
 import * as tmp from 'tmp';
@@ -7,8 +6,6 @@ import * as tmp from 'tmp';
 import { utils } from '../src/utils';
 
 tmp.setGracefulCleanup(); // remove tmp files even if there are failures
-
-chai.use(dirtyChai);
 
 const expect = chai.expect;
 
@@ -55,7 +52,7 @@ describe('isOutputFileUpToDate()', () => {
 
         describe('without an existing output file', () => {
             it('should return false', () => {
-                expect(utils.isOutputFileUpToDate(abiFile, 'nonexistant_file')).to.be.false();
+                expect(utils.isOutputFileUpToDate(abiFile, 'nonexistant_file')).to.be.false;
             });
         });
 
@@ -71,7 +68,7 @@ describe('isOutputFileUpToDate()', () => {
             });
 
             it('should return true when output file is newer than abi file', async () => {
-                expect(utils.isOutputFileUpToDate(abiFile, outputFile)).to.be.true();
+                expect(utils.isOutputFileUpToDate(abiFile, outputFile)).to.be.true;
             });
 
             it('should return false when output file exists but is older than abi file', () => {
@@ -79,7 +76,7 @@ describe('isOutputFileUpToDate()', () => {
                 const abiFileModTimeMs = outFileModTimeMs + 1;
                 fs.utimesSync(abiFile, abiFileModTimeMs, abiFileModTimeMs);
 
-                expect(utils.isOutputFileUpToDate(abiFile, outputFile)).to.be.false();
+                expect(utils.isOutputFileUpToDate(abiFile, outputFile)).to.be.false;
             });
         });
     });

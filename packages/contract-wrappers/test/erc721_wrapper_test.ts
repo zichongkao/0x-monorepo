@@ -163,7 +163,7 @@ describe('ERC721Wrapper', () => {
                 ownerAddress,
                 operatorAddress,
             );
-            expect(isApprovedForAll).to.be.false();
+            expect(isApprovedForAll).to.be.false;
             // set
             isApprovedForAll = true;
             let txHash = await contractWrappers.erc721Token.setApprovalForAllAsync(
@@ -178,7 +178,7 @@ describe('ERC721Wrapper', () => {
                 ownerAddress,
                 operatorAddress,
             );
-            expect(isApprovedForAll).to.be.true();
+            expect(isApprovedForAll).to.be.true;
             // unset
             txHash = await contractWrappers.erc721Token.setApprovalForAllAsync(
                 tokenAddress,
@@ -192,7 +192,7 @@ describe('ERC721Wrapper', () => {
                 ownerAddress,
                 operatorAddress,
             );
-            expect(isApprovedForAll).to.be.false();
+            expect(isApprovedForAll).to.be.false;
         });
     });
     describe('#setProxyApprovalForAllAsync/isProxyApprovedForAllAsync', () => {
@@ -208,7 +208,7 @@ describe('ERC721Wrapper', () => {
                 tokenAddress,
                 ownerAddress,
             );
-            expect(isApprovedForAll).to.be.true();
+            expect(isApprovedForAll).to.be.true;
         });
     });
     describe('#setApprovalAsync/getApprovedIfExistsAsync', () => {
@@ -219,7 +219,7 @@ describe('ERC721Wrapper', () => {
                 tokenAddress,
                 tokenId,
             );
-            expect(approvalBeforeSet).to.be.undefined();
+            expect(approvalBeforeSet).to.be.undefined;
             await contractWrappers.erc721Token.setApprovalAsync(tokenAddress, approvedAddress, tokenId);
             const approvalAfterSet = await contractWrappers.erc721Token.getApprovedIfExistsAsync(tokenAddress, tokenId);
             expect(approvalAfterSet).to.be.equal(approvedAddress);
@@ -230,10 +230,10 @@ describe('ERC721Wrapper', () => {
             const tokenId = await tokenUtils.mintDummyERC721Async(tokenAddress, ownerAddress);
 
             const approvalBeforeSet = await contractWrappers.erc721Token.isProxyApprovedAsync(tokenAddress, tokenId);
-            expect(approvalBeforeSet).to.be.false();
+            expect(approvalBeforeSet).to.be.false;
             await contractWrappers.erc721Token.setProxyApprovalAsync(tokenAddress, tokenId);
             const approvalAfterSet = await contractWrappers.erc721Token.isProxyApprovedAsync(tokenAddress, tokenId);
-            expect(approvalAfterSet).to.be.true();
+            expect(approvalAfterSet).to.be.true;
         });
     });
     describe('#subscribe', () => {
@@ -250,7 +250,7 @@ describe('ERC721Wrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<ERC721TokenTransferEventArgs>) => {
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent.isRemoved).to.be.false;
                         expect(logEvent.log.logIndex).to.be.equal(0);
                         expect(logEvent.log.transactionIndex).to.be.equal(0);
                         expect(logEvent.log.blockNumber).to.be.a('number');
@@ -292,8 +292,8 @@ describe('ERC721Wrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<ERC721TokenApprovalEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         const args = logEvent.log.args;
                         expect(args._owner).to.be.equal(ownerAddress);
                         expect(args._approved).to.be.equal(approvedAddress);

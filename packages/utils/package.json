@@ -30,6 +30,7 @@
         "@0xproject/tslint-config": "^1.0.7",
         "@types/detect-node": "2.0.0",
         "@types/lodash": "4.14.104",
+        "@types/chai": "^4.1.4",
         "@types/mocha": "^2.2.42",
         "chai": "^4.0.1",
         "copyfiles": "^2.0.0",

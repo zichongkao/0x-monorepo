@@ -1,6 +1,5 @@
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as dirtyChai from 'dirty-chai';
 import * as _ from 'lodash';
 import 'mocha';
 import {
@@ -17,7 +16,6 @@ import { utils } from '../src/utils';
 import * as postmanEnvironmentJSON from './environments/postman_environment.json';
 
 chai.config.includeStack = true;
-chai.use(dirtyChai);
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -54,7 +52,7 @@ export const testRunner = {
                     CONTENT_TYPE_ASSERTION_NAME,
                 );
                 const errorMessage = _.get(error, 'message');
-                expect(error).to.not.be.undefined();
+                expect(error).to.not.be.undefined;
                 expect(errorMessage).to.equal(`expected response to have header with key 'Content-Type'`);
             });
             it('fails when Content-Type header exists but not with value application/json', async () => {
@@ -69,7 +67,7 @@ export const testRunner = {
                     CONTENT_TYPE_ASSERTION_NAME,
                 );
                 const errorMessage = _.get(error, 'message');
-                expect(error).to.not.be.undefined();
+                expect(error).to.not.be.undefined;
                 expect(errorMessage).to.equal(`expected 'text/html' to include 'application/json'`);
             });
             it('passes when Content-Type header exists with value application/json', async () => {
@@ -83,7 +81,7 @@ export const testRunner = {
                     postmanCollectionRequestName,
                     CONTENT_TYPE_ASSERTION_NAME,
                 );
-                expect(error).to.be.undefined();
+                expect(error).to.be.undefined;
             });
         });
     },
@@ -104,14 +102,14 @@ export const testRunner = {
                 const summary = await utils.newmanRunAsync(newmanRunOptions);
                 const error = findAssertionErrorIfExists(summary, postmanCollectionRequestName, SCHEMA_ASSERTION_NAME);
                 const errorMessage = _.get(error, 'message');
-                expect(error).to.not.be.undefined();
+                expect(error).to.not.be.undefined;
                 expect(errorMessage).to.equal('expected false to be true');
             });
             it('passes when schema is valid', async () => {
                 nockInterceptor.reply(SUCCESS_STATUS, correctJson);
                 const summary = await utils.newmanRunAsync(newmanRunOptions);
                 const error = findAssertionErrorIfExists(summary, postmanCollectionRequestName, SCHEMA_ASSERTION_NAME);
-                expect(error).to.be.undefined();
+                expect(error).to.be.undefined;
             });
         });
     },

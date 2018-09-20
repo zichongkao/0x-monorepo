@@ -94,7 +94,7 @@ describe('ZRXToken', () => {
             const didReturnTrue = await zrxToken.transfer.callAsync(spender, new BigNumber(0), {
                 from: owner,
             });
-            expect(didReturnTrue).to.be.true();
+            expect(didReturnTrue).to.be.true;
         });
     });
 
@@ -112,7 +112,7 @@ describe('ZRXToken', () => {
             const didReturnTrue = await zrxToken.transferFrom.callAsync(owner, spender, amountToTransfer, {
                 from: spender,
             });
-            expect(didReturnTrue).to.be.false();
+            expect(didReturnTrue).to.be.false;
         });
 
         it('should return false if spender has insufficient allowance', async () => {
@@ -121,12 +121,12 @@ describe('ZRXToken', () => {
 
             const spenderAllowance = await zrxToken.allowance.callAsync(owner, spender);
             const isSpenderAllowanceInsufficient = spenderAllowance.cmp(amountToTransfer) < 0;
-            expect(isSpenderAllowanceInsufficient).to.be.true();
+            expect(isSpenderAllowanceInsufficient).to.be.true;
 
             const didReturnTrue = await zrxToken.transferFrom.callAsync(owner, spender, amountToTransfer, {
                 from: spender,
             });
-            expect(didReturnTrue).to.be.false();
+            expect(didReturnTrue).to.be.false;
         });
 
         it('should return true on a 0 value transfer', async () => {
@@ -134,7 +134,7 @@ describe('ZRXToken', () => {
             const didReturnTrue = await zrxToken.transferFrom.callAsync(owner, spender, amountToTransfer, {
                 from: spender,
             });
-            expect(didReturnTrue).to.be.true();
+            expect(didReturnTrue).to.be.true;
         });
 
         it('should not modify spender allowance if spender allowance is 2^256 - 1', async () => {

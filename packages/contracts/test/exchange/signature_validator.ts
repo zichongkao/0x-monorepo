@@ -164,7 +164,7 @@ describe('MixinSignatureValidator', () => {
                 signedOrder.makerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should revert when SignatureType=Invalid and signature length is non-zero', async () => {
@@ -202,7 +202,7 @@ describe('MixinSignatureValidator', () => {
                 signerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return false when SignatureType=EIP712 and signature is invalid', async () => {
@@ -225,7 +225,7 @@ describe('MixinSignatureValidator', () => {
                 notSignerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should return true when SignatureType=EthSign and signature is valid', async () => {
@@ -251,7 +251,7 @@ describe('MixinSignatureValidator', () => {
                 signerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return false when SignatureType=EthSign and signature is invalid', async () => {
@@ -278,7 +278,7 @@ describe('MixinSignatureValidator', () => {
                 notSignerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should return true when SignatureType=Wallet and signature is valid', async () => {
@@ -300,7 +300,7 @@ describe('MixinSignatureValidator', () => {
                 testWallet.address,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return false when SignatureType=Wallet and signature is invalid', async () => {
@@ -323,7 +323,7 @@ describe('MixinSignatureValidator', () => {
                 testWallet.address,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should revert when `isValidSignature` attempts to update state and SignatureType=Wallet', async () => {
@@ -360,7 +360,7 @@ describe('MixinSignatureValidator', () => {
                 signerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return false when SignatureType=Validator, signature is invalid and validator is approved', async () => {
@@ -376,7 +376,7 @@ describe('MixinSignatureValidator', () => {
                 notSignerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should revert when `isValidSignature` attempts to update state and SignatureType=Validator', async () => {
@@ -411,7 +411,7 @@ describe('MixinSignatureValidator', () => {
                 signerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should return true when SignatureType=Presigned and signer has presigned hash', async () => {
@@ -433,7 +433,7 @@ describe('MixinSignatureValidator', () => {
                 signedOrder.makerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return false when SignatureType=Presigned and signer has not presigned hash', async () => {
@@ -445,7 +445,7 @@ describe('MixinSignatureValidator', () => {
                 signedOrder.makerAddress,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.false();
+            expect(isValidSignature).to.be.false;
         });
 
         it('should return true when message was signed by a Trezor One (firmware version 1.6.2)', async () => {
@@ -463,7 +463,7 @@ describe('MixinSignatureValidator', () => {
                 signer,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
 
         it('should return true when message was signed by a Trezor Model T (firmware version 2.0.7)', async () => {
@@ -481,7 +481,7 @@ describe('MixinSignatureValidator', () => {
                 signer,
                 signatureHex,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
     });
 

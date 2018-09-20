@@ -212,13 +212,13 @@ describe('matchOrders', () => {
                 denominator,
                 target,
             );
-            expect(isRoundingErrorCeil).to.be.true();
+            expect(isRoundingErrorCeil).to.be.true;
             const isRoundingErrorFloor = await testExchange.publicIsRoundingErrorFloor.callAsync(
                 numerator,
                 denominator,
                 target,
             );
-            expect(isRoundingErrorFloor).to.be.false();
+            expect(isRoundingErrorFloor).to.be.false;
             // Match signedOrderLeft with signedOrderRight
             // Note that the left maker received a slightly better sell price.
             // This is intentional; see note in MixinMatchOrders.calculateMatchedFillResults.
@@ -276,13 +276,13 @@ describe('matchOrders', () => {
                 denominator,
                 target,
             );
-            expect(isRoundingErrorFloor).to.be.true();
+            expect(isRoundingErrorFloor).to.be.true;
             const isRoundingErrorCeil = await testExchange.publicIsRoundingErrorCeil.callAsync(
                 numerator,
                 denominator,
                 target,
             );
-            expect(isRoundingErrorCeil).to.be.false();
+            expect(isRoundingErrorCeil).to.be.false;
             // Match signedOrderLeft with signedOrderRight
             // Note that the right maker received a slightly better purchase price.
             // This is intentional; see note in MixinMatchOrders.calculateMatchedFillResults.

@@ -112,7 +112,7 @@ describe('OrderWatcher', () => {
                 [orderHash]: signedOrder,
             });
             orderHashesByERC20ByMakerAddress = (dependentOrderHashesTracker as any)._orderHashesByERC20ByMakerAddress;
-            expect(orderHashesByERC20ByMakerAddress[signedOrder.makerAddress]).to.be.undefined();
+            expect(orderHashesByERC20ByMakerAddress[signedOrder.makerAddress]).to.be.undefined;
         });
         it('should no-op when removing a non-existing order', async () => {
             signedOrder = await fillScenarios.createFillableSignedOrderAsync(
@@ -158,7 +158,7 @@ describe('OrderWatcher', () => {
                 const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                 await orderWatcher.addOrderAsync(signedOrder);
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.false();
+                    expect(orderState.isValid).to.be.false;
                     const invalidOrderState = orderState as OrderStateInvalid;
                     expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                     expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.InsufficientMakerAllowance);
@@ -211,7 +211,7 @@ describe('OrderWatcher', () => {
                 const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                 await orderWatcher.addOrderAsync(signedOrder);
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.false();
+                    expect(orderState.isValid).to.be.false;
                     const invalidOrderState = orderState as OrderStateInvalid;
                     expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                     expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.InsufficientMakerBalance);
@@ -240,7 +240,7 @@ describe('OrderWatcher', () => {
                 await orderWatcher.addOrderAsync(signedOrder);
 
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.false();
+                    expect(orderState.isValid).to.be.false;
                     const invalidOrderState = orderState as OrderStateInvalid;
                     expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                     expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.OrderRemainingFillAmountZero);
@@ -266,7 +266,7 @@ describe('OrderWatcher', () => {
                 await orderWatcher.addOrderAsync(signedOrder);
 
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.true();
+                    expect(orderState.isValid).to.be.true;
                     const validOrderState = orderState as OrderStateValid;
                     expect(validOrderState.orderHash).to.be.equal(orderHash);
                     const orderRelevantState = validOrderState.orderRelevantState;
@@ -325,7 +325,7 @@ describe('OrderWatcher', () => {
                     const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                     await orderWatcher.addOrderAsync(signedOrder);
                     const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                        expect(orderState.isValid).to.be.true();
+                        expect(orderState.isValid).to.be.true;
                         const validOrderState = orderState as OrderStateValid;
                         expect(validOrderState.orderHash).to.be.equal(orderHash);
                         const orderRelevantState = validOrderState.orderRelevantState;
@@ -391,7 +391,7 @@ describe('OrderWatcher', () => {
                     await orderWatcher.addOrderAsync(signedOrder);
 
                     const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                        expect(orderState.isValid).to.be.true();
+                        expect(orderState.isValid).to.be.true;
                         const validOrderState = orderState as OrderStateValid;
                         const orderRelevantState = validOrderState.orderRelevantState;
                         expect(orderRelevantState.remainingFillableMakerAssetAmount).to.be.bignumber.equal(
@@ -498,7 +498,7 @@ describe('OrderWatcher', () => {
                 await orderWatcher.addOrderAsync(signedOrder);
 
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.false();
+                    expect(orderState.isValid).to.be.false;
                     const invalidOrderState = orderState as OrderStateInvalid;
                     expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                     expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.OrderCancelled);
@@ -523,7 +523,7 @@ describe('OrderWatcher', () => {
                 const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                 await orderWatcher.addOrderAsync(signedOrder);
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                    expect(orderState.isValid).to.be.false();
+                    expect(orderState.isValid).to.be.false;
                     const invalidOrderState = orderState as OrderStateInvalid;
                     expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                     expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.OrderFillRoundingError);
@@ -551,7 +551,7 @@ describe('OrderWatcher', () => {
                     const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                     await orderWatcher.addOrderAsync(signedOrder);
                     const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                        expect(orderState.isValid).to.be.false();
+                        expect(orderState.isValid).to.be.false;
                         const invalidOrderState = orderState as OrderStateInvalid;
                         expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                         expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.InsufficientMakerAllowance);
@@ -587,7 +587,7 @@ describe('OrderWatcher', () => {
                     const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                     await orderWatcher.addOrderAsync(signedOrder);
                     const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                        expect(orderState.isValid).to.be.false();
+                        expect(orderState.isValid).to.be.false;
                         const invalidOrderState = orderState as OrderStateInvalid;
                         expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                         expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.InsufficientMakerAllowance);
@@ -613,7 +613,7 @@ describe('OrderWatcher', () => {
                     const orderHash = orderHashUtils.getOrderHashHex(signedOrder);
                     await orderWatcher.addOrderAsync(signedOrder);
                     const callback = callbackErrorReporter.reportNodeCallbackErrors(done)((orderState: OrderState) => {
-                        expect(orderState.isValid).to.be.false();
+                        expect(orderState.isValid).to.be.false;
                         const invalidOrderState = orderState as OrderStateInvalid;
                         expect(invalidOrderState.orderHash).to.be.equal(orderHash);
                         expect(invalidOrderState.error).to.be.equal(ExchangeContractErrs.InsufficientMakerBalance);

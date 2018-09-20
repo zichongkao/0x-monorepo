@@ -17,7 +17,7 @@ describe('OrderValidationUtils', () => {
             const target = new BigNumber(50);
             // rounding error = ((20*50/999) - floor(20*50/999)) / (20*50/999) = 0.1%
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.false();
+            expect(isRoundingError).to.be.false;
         });
 
         it('should return false if there is a rounding of 0.09%', async () => {
@@ -26,7 +26,7 @@ describe('OrderValidationUtils', () => {
             const target = new BigNumber(500);
             // rounding error = ((20*500/9991) - floor(20*500/9991)) / (20*500/9991) = 0.09%
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.false();
+            expect(isRoundingError).to.be.false;
         });
 
         it('should return true if there is a rounding error of 0.11%', async () => {
@@ -35,7 +35,7 @@ describe('OrderValidationUtils', () => {
             const target = new BigNumber(500);
             // rounding error = ((20*500/9989) - floor(20*500/9989)) / (20*500/9989) = 0.011%
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.true();
+            expect(isRoundingError).to.be.true;
         });
 
         it('should return true if there is a rounding error > 0.1%', async () => {
@@ -44,7 +44,7 @@ describe('OrderValidationUtils', () => {
             const target = new BigNumber(10);
             // rounding error = ((3*10/7) - floor(3*10/7)) / (3*10/7) = 6.67%
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.true();
+            expect(isRoundingError).to.be.true;
         });
 
         it('should return false when there is no rounding error', async () => {
@@ -53,7 +53,7 @@ describe('OrderValidationUtils', () => {
             const target = new BigNumber(10);
 
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.false();
+            expect(isRoundingError).to.be.false;
         });
 
         it('should return false when there is rounding error <= 0.1%', async () => {
@@ -64,7 +64,7 @@ describe('OrderValidationUtils', () => {
             // rounding error = ((76564*105762562/676373677) - floor(76564*105762562/676373677)) /
             // (76564*105762562/676373677) = 0.0007%
             const isRoundingError = OrderValidationUtils.isRoundingErrorFloor(numerator, denominator, target);
-            expect(isRoundingError).to.be.false();
+            expect(isRoundingError).to.be.false;
         });
     });
 });

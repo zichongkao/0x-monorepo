@@ -26,13 +26,13 @@ describe('Signature utils', () => {
             const bytes32Zeros = '0x0000000000000000000000000000000000000000000000000000000000000000';
             expect(
                 await signatureUtils.isValidSignatureAsync(provider, bytes32Zeros, ethSignSignature, address),
-            ).to.be.false();
+            ).to.be.false;
         });
         it("should return false if the address doesn't pertain to the signature & data", async () => {
             const validUnrelatedAddress = '0x8b0292b11a196601ed2ce54b665cafeca0347d42';
             expect(
                 await signatureUtils.isValidSignatureAsync(provider, dataHex, ethSignSignature, validUnrelatedAddress),
-            ).to.be.false();
+            ).to.be.false;
         });
         it("should return false if the signature doesn't pertain to the dataHex & address", async () => {
             const signatureArray = ethSignSignature.split('');
@@ -41,7 +41,7 @@ describe('Signature utils', () => {
             const wrongSignature = signatureArray.join('');
             expect(
                 await signatureUtils.isValidSignatureAsync(provider, dataHex, wrongSignature, address),
-            ).to.be.false();
+            ).to.be.false;
         });
 
         it('should throw if signatureType is invalid', () => {
@@ -60,7 +60,7 @@ describe('Signature utils', () => {
                 ethSignSignature,
                 address,
             );
-            expect(isValidSignatureLocal).to.be.true();
+            expect(isValidSignatureLocal).to.be.true;
         });
 
         it('should return true for a valid EIP712 signature', async () => {
@@ -74,7 +74,7 @@ describe('Signature utils', () => {
                 eip712Signature,
                 address,
             );
-            expect(isValidSignatureLocal).to.be.true();
+            expect(isValidSignatureLocal).to.be.true;
         });
     });
     describe('#isValidECSignature', () => {
@@ -87,32 +87,32 @@ describe('Signature utils', () => {
         const address = '0x0e5cb767cce09a7f3ca594df118aa519be5e2b5a';
 
         it("should return false if the data doesn't pertain to the signature & address", async () => {
-            expect(signatureUtils.isValidECSignature('0x0', signature, address)).to.be.false();
+            expect(signatureUtils.isValidECSignature('0x0', signature, address)).to.be.false;
         });
         it("should return false if the address doesn't pertain to the signature & data", async () => {
             const validUnrelatedAddress = '0x8b0292b11a196601ed2ce54b665cafeca0347d42';
-            expect(signatureUtils.isValidECSignature(data, signature, validUnrelatedAddress)).to.be.false();
+            expect(signatureUtils.isValidECSignature(data, signature, validUnrelatedAddress)).to.be.false;
         });
         it("should return false if the signature doesn't pertain to the data & address", async () => {
             const wrongSignature = _.assign({}, signature, { v: 28 });
-            expect(signatureUtils.isValidECSignature(data, wrongSignature, address)).to.be.false();
+            expect(signatureUtils.isValidECSignature(data, wrongSignature, address)).to.be.false;
         });
         it('should return true if the signature does pertain to the data & address', async () => {
             const isValidSignatureLocal = signatureUtils.isValidECSignature(data, signature, address);
-            expect(isValidSignatureLocal).to.be.true();
+            expect(isValidSignatureLocal).to.be.true;
         });
     });
     describe('#generateSalt', () => {
         it('generates different salts', () => {
             const isEqual = generatePseudoRandomSalt().eq(generatePseudoRandomSalt());
-            expect(isEqual).to.be.false();
+            expect(isEqual).to.be.false;
         });
         it('generates salt in range [0..2^256)', () => {
             const salt = generatePseudoRandomSalt();
-            expect(salt.greaterThanOrEqualTo(0)).to.be.true();
+            expect(salt.greaterThanOrEqualTo(0)).to.be.true;
             // tslint:disable-next-line:custom-no-magic-numbers
             const twoPow256 = new BigNumber(2).pow(256);
-            expect(salt.lessThan(twoPow256)).to.be.true();
+            expect(salt.lessThan(twoPow256)).to.be.true;
         });
     });
     describe('#ecSignOrderHashAsync', () => {
@@ -247,7 +247,7 @@ describe('Signature utils', () => {
                 ecSignature,
                 makerAddress,
             );
-            expect(isValidSignature).to.be.true();
+            expect(isValidSignature).to.be.true;
         });
     });
     describe('#convertECSignatureToSignatureHex', () => {

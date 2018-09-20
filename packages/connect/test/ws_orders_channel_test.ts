@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import * as _ from 'lodash';
 import 'mocha';
 import * as Sinon from 'sinon';
@@ -8,7 +7,6 @@ import * as WebSocket from 'websocket';
 import { WebSocketOrdersChannel } from '../src/ws_orders_channel';
 
 chai.config.includeStack = true;
-chai.use(dirtyChai);
 const expect = chai.expect;
 const emptyOrdersChannelHandler = {
     onUpdate: _.noop.bind(_),

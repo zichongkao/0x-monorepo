@@ -139,7 +139,7 @@ describe('AssetProxyOwner', () => {
             const isFunctionRemoveAuthorizedAddressAtIndex = await testAssetProxyOwner.isFunctionRemoveAuthorizedAddressAtIndex.callAsync(
                 notRemoveAuthorizedAddressData,
             );
-            expect(isFunctionRemoveAuthorizedAddressAtIndex).to.be.false();
+            expect(isFunctionRemoveAuthorizedAddressAtIndex).to.be.false;
         });
 
         it('should return true if data is for removeAuthorizedAddressAtIndex', async () => {
@@ -151,7 +151,7 @@ describe('AssetProxyOwner', () => {
             const isFunctionRemoveAuthorizedAddressAtIndex = await testAssetProxyOwner.isFunctionRemoveAuthorizedAddressAtIndex.callAsync(
                 removeAuthorizedAddressAtIndexData,
             );
-            expect(isFunctionRemoveAuthorizedAddressAtIndex).to.be.true();
+            expect(isFunctionRemoveAuthorizedAddressAtIndex).to.be.true;
         });
     });
 
@@ -313,7 +313,7 @@ describe('AssetProxyOwner', () => {
                 const isValidRemoveAuthorizedAddressAtIndexTx = await testAssetProxyOwner.testValidRemoveAuthorizedAddressAtIndexTx.callAsync(
                     txId,
                 );
-                expect(isValidRemoveAuthorizedAddressAtIndexTx).to.be.true();
+                expect(isValidRemoveAuthorizedAddressAtIndexTx).to.be.true;
             });
 
             it('should revert if data is for removeAuthorizedAddressAtIndex and proxy is not registered', async () => {

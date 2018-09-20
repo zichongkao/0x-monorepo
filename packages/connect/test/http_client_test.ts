@@ -1,7 +1,6 @@
 import { BigNumber } from '@0xproject/utils';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as dirtyChai from 'dirty-chai';
 import * as fetchMock from 'fetch-mock';
 import 'mocha';
 
@@ -21,7 +20,6 @@ import { ordersResponse } from './fixtures/standard_relayer_api/orders';
 import * as ordersResponseJSON from './fixtures/standard_relayer_api/orders.json';
 
 chai.config.includeStack = true;
-chai.use(dirtyChai);
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 

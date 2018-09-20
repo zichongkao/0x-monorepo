@@ -1,10 +1,8 @@
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import 'mocha';
 
 import { utils } from '../src/utils';
 
-chai.use(dirtyChai);
 const expect = chai.expect;
 
 describe('utils', () => {
@@ -25,7 +23,7 @@ describe('utils', () => {
                     { start: { line: 1, column: 3 }, end: { line: 1, column: 4 } },
                     { start: { line: 1, column: 2 }, end: { line: 1, column: 5 } },
                 ),
-            ).to.be.true();
+            ).to.be.true;
         });
         it('returns true if the same', () => {
             expect(
@@ -33,7 +31,7 @@ describe('utils', () => {
                     { start: { line: 1, column: 3 }, end: { line: 1, column: 4 } },
                     { start: { line: 1, column: 3 }, end: { line: 1, column: 4 } },
                 ),
-            ).to.be.true();
+            ).to.be.true;
         });
         it('returns false if not inside', () => {
             expect(
@@ -41,13 +39,13 @@ describe('utils', () => {
                     { start: { line: 1, column: 3 }, end: { line: 1, column: 4 } },
                     { start: { line: 1, column: 4 }, end: { line: 1, column: 4 } },
                 ),
-            ).to.be.false();
+            ).to.be.false;
             expect(
                 utils.isRangeInside(
                     { start: { line: 1, column: 3 }, end: { line: 1, column: 4 } },
                     { start: { line: 1, column: 4 }, end: { line: 1, column: 5 } },
                 ),
-            ).to.be.false();
+            ).to.be.false;
         });
     });
 });

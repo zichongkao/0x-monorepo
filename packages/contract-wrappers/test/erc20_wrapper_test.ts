@@ -475,7 +475,7 @@ describe('ERC20Wrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<ERC20TokenTransferEventArgs>) => {
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent.isRemoved).to.be.false;
                         expect(logEvent.log.logIndex).to.be.equal(0);
                         expect(logEvent.log.transactionIndex).to.be.equal(0);
                         expect(logEvent.log.blockNumber).to.be.a('number');
@@ -503,8 +503,8 @@ describe('ERC20Wrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<ERC20TokenApprovalEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         const args = logEvent.log.args;
                         expect(args._owner).to.be.equal(coinbase);
                         expect(args._spender).to.be.equal(addressWithoutFunds);

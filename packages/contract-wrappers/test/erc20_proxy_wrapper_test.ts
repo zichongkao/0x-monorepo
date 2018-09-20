@@ -20,7 +20,7 @@ describe('ERC20ProxyWrapper', () => {
     describe('#isAuthorizedAsync', () => {
         it('should return false if the address is not authorized', async () => {
             const isAuthorized = await contractWrappers.erc20Proxy.isAuthorizedAsync(constants.NULL_ADDRESS);
-            expect(isAuthorized).to.be.false();
+            expect(isAuthorized).to.be.false;
         });
     });
     describe('#getAuthorizedAddressesAsync', () => {
@@ -28,7 +28,7 @@ describe('ERC20ProxyWrapper', () => {
             const authorizedAddresses = await contractWrappers.erc20Proxy.getAuthorizedAddressesAsync();
             for (const authorizedAddress of authorizedAddresses) {
                 const isAuthorized = await contractWrappers.erc20Proxy.isAuthorizedAsync(authorizedAddress);
-                expect(isAuthorized).to.be.true();
+                expect(isAuthorized).to.be.true;
             }
         });
     });

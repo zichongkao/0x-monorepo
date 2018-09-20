@@ -288,13 +288,13 @@ describe('ExchangeWrapper', () => {
                 signedOrder.makerAddress,
                 signedOrder.signature,
             );
-            expect(isValid).to.be.true();
+            expect(isValid).to.be.true;
             isValid = await contractWrappers.exchange.isValidSignatureAsync(
                 orderHash,
                 signedOrder.takerAddress,
                 signedOrder.signature,
             );
-            expect(isValid).to.be.false();
+            expect(isValid).to.be.false;
         });
     });
     describe('#isAllowedValidatorAsync', () => {
@@ -302,7 +302,7 @@ describe('ExchangeWrapper', () => {
             const signerAddress = makerAddress;
             const validatorAddress = constants.NULL_ADDRESS;
             const isAllowed = await contractWrappers.exchange.isAllowedValidatorAsync(signerAddress, validatorAddress);
-            expect(isAllowed).to.be.false();
+            expect(isAllowed).to.be.false;
         });
     });
     describe('#setSignatureValidatorApproval', () => {
@@ -322,7 +322,7 @@ describe('ExchangeWrapper', () => {
         it('should check if the transaction is executed', async () => {
             const transactionHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
             const isExecuted = await contractWrappers.exchange.isTransactionExecutedAsync(transactionHash);
-            expect(isExecuted).to.be.false();
+            expect(isExecuted).to.be.false;
         });
     });
     describe('#getAssetProxyBySignatureAsync', () => {
@@ -343,7 +343,7 @@ describe('ExchangeWrapper', () => {
             const hash = orderHashUtils.getOrderHashHex(signedOrder);
             const signerAddress = signedOrder.makerAddress;
             let isPreSigned = await contractWrappers.exchange.isPreSignedAsync(hash, signerAddress);
-            expect(isPreSigned).to.be.false();
+            expect(isPreSigned).to.be.false;
             txHash = await contractWrappers.exchange.preSignAsync(
                 hash,
                 signerAddress,
@@ -352,7 +352,7 @@ describe('ExchangeWrapper', () => {
             );
             await web3Wrapper.awaitTransactionSuccessAsync(txHash, constants.AWAIT_TRANSACTION_MINED_MS);
             isPreSigned = await contractWrappers.exchange.isPreSignedAsync(hash, signerAddress);
-            expect(isPreSigned).to.be.true();
+            expect(isPreSigned).to.be.true;
         });
     });
     describe('#getVersionAsync', () => {

@@ -68,7 +68,7 @@ describe('EtherTokenWrapper', () => {
     describe('#getContractAddressIfExists', async () => {
         it('should return contract address if connected to a known network', () => {
             const contractAddressIfExists = contractWrappers.etherToken.getContractAddressIfExists();
-            expect(contractAddressIfExists).to.not.be.undefined();
+            expect(contractAddressIfExists).to.not.be.undefined;
         });
         it('should throw if connected to a private network and contract addresses are not specified', () => {
             const UNKNOWN_NETWORK_NETWORK_ID = 10;
@@ -186,8 +186,8 @@ describe('EtherTokenWrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<WETH9TransferEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         expect(logEvent.log.logIndex).to.be.equal(0);
                         expect(logEvent.log.transactionIndex).to.be.equal(0);
                         expect(logEvent.log.blockNumber).to.be.a('number');
@@ -216,8 +216,8 @@ describe('EtherTokenWrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<WETH9ApprovalEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         const args = logEvent.log.args;
                         expect(args._owner).to.be.equal(addressWithETH);
                         expect(args._spender).to.be.equal(addressWithoutFunds);
@@ -242,8 +242,8 @@ describe('EtherTokenWrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<WETH9DepositEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         const args = logEvent.log.args;
                         expect(args._owner).to.be.equal(addressWithETH);
                         expect(args._value).to.be.bignumber.equal(depositAmount);
@@ -262,8 +262,8 @@ describe('EtherTokenWrapper', () => {
             (async () => {
                 const callback = callbackErrorReporter.reportNodeCallbackErrors(done)(
                     (logEvent: DecodedLogEvent<WETH9WithdrawalEventArgs>) => {
-                        expect(logEvent).to.not.be.undefined();
-                        expect(logEvent.isRemoved).to.be.false();
+                        expect(logEvent).to.not.be.undefined;
+                        expect(logEvent.isRemoved).to.be.false;
                         const args = logEvent.log.args;
                         expect(args._owner).to.be.equal(addressWithETH);
                         expect(args._value).to.be.bignumber.equal(depositAmount);

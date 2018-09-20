@@ -30,6 +30,7 @@
     "devDependencies": {
         "@0xproject/tslint-config": "^1.0.7",
         "@types/lodash": "4.14.104",
+        "@types/chai": "^4.1.4",
         "chai": "^4.0.1",
         "copyfiles": "^2.0.0",
         "make-promises-safe": "^1.1.0",

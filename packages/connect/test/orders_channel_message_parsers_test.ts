@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as dirtyChai from 'dirty-chai';
 import 'mocha';
 
 import { ordersChannelMessageParser } from '../src/utils/orders_channel_message_parser';
@@ -12,7 +11,6 @@ import {
 } from './fixtures/standard_relayer_api/update_orders_channel_message';
 
 chai.config.includeStack = true;
-chai.use(dirtyChai);
 const expect = chai.expect;
 
 describe('ordersChannelMessageParser', () => {
@@ -25,7 +23,7 @@ describe('ordersChannelMessageParser', () => {
         it('returns unknown message for messages with unsupported types', () => {
             const unknownMessage = ordersChannelMessageParser.parse(unknownOrdersChannelMessage);
             expect(unknownMessage.type).to.be.equal('unknown');
-            expect(unknownMessage.payload).to.be.undefined();
+            expect(unknownMessage.payload).to.be.undefined;
         });
         it('throws when message does not include a type', () => {
             const typelessMessage = `{

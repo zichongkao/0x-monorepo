@@ -111,7 +111,7 @@ export class MatchOrderTester {
     ): Promise<void> {
         // ERC20 Balances
         const areERC20BalancesEqual = _.isEqual(expectedERC20BalancesByOwner, realERC20BalancesByOwner);
-        expect(areERC20BalancesEqual, 'Checking all known ERC20 account balances').to.be.true();
+        expect(areERC20BalancesEqual, 'Checking all known ERC20 account balances').to.be.true;
         // ERC721 Token Ids
         const sortedExpectedNewERC721TokenIdsByOwner = _.mapValues(expectedERC721TokenIdsByOwner, tokenIdsByOwner => {
             _.mapValues(tokenIdsByOwner, tokenIds => {
@@ -127,7 +127,7 @@ export class MatchOrderTester {
             sortedExpectedNewERC721TokenIdsByOwner,
             sortedNewERC721TokenIdsByOwner,
         );
-        expect(areERC721TokenIdsEqual, 'Checking all known ERC721 account balances').to.be.true();
+        expect(areERC721TokenIdsEqual, 'Checking all known ERC721 account balances').to.be.true;
     }
     /// @dev Constructs new MatchOrderTester.
     /// @param exchangeWrapper Used to call to the Exchange.
