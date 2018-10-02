@@ -31,6 +31,7 @@ const ERR_MSG_MAPPING = {
             [TransferType.Fee]: ExchangeContractErrs.InsufficientTakerFeeAllowance,
         },
     },
+    test: 'bundle size',
 };
 
 /**
