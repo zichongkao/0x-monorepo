@@ -199,27 +199,24 @@ export abstract class ContractWrapper {
     // This method only exists in order to comply with the expected interface of Blockstream's constructor
     private async _blockstreamGetBlockOrNullAsync(hash: string): Promise<Block | null> {
         const shouldIncludeTransactionData = false;
-        const blockOrNull = await this._web3Wrapper.sendRawPayloadAsync<Block | null>({
-            method: 'eth_getBlockByHash',
-            params: [hash, shouldIncludeTransactionData],
-        });
+        const blockOrNull = await this._web3Wrapper.sendRawPayloadAsync<Block | null>('eth_getBlockByHash', [
+            hash,
+            shouldIncludeTransactionData,
+        ]);
         return blockOrNull;
     }
     // This method only exists in order to comply with the expected interface of Blockstream's constructor
     private async _blockstreamGetLatestBlockOrNullAsync(): Promise<Block | null> {
         const shouldIncludeTransactionData = false;
-        const blockOrNull = await this._web3Wrapper.sendRawPayloadAsync<Block | null>({
-            method: 'eth_getBlockByNumber',
-            params: [BlockParamLiteral.Latest, shouldIncludeTransactionData],
-        });
+        const blockOrNull = await this._web3Wrapper.sendRawPayloadAsync<Block | null>('eth_getBlockByNumber', [
+            BlockParamLiteral.Latest,
+            shouldIncludeTransactionData,
+        ]);
         return blockOrNull;
     }
     // This method only exists in order to comply with the expected interface of Blockstream's constructor
     private async _blockstreamGetLogsAsync(filterOptions: FilterObject): Promise<RawLogEntry[]> {
-        const logs = await this._web3Wrapper.sendRawPayloadAsync<RawLogEntry[]>({
-            method: 'eth_getLogs',
-            params: [filterOptions],
-        });
+        const logs = await this._web3Wrapper.sendRawPayloadAsync<RawLogEntry[]>('eth_getLogs', [filterOptions]);
         return logs as RawLogEntry[];
     }
     // HACK: This should be a package-scoped method (which doesn't exist in TS)

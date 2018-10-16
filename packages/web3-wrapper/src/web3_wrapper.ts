@@ -8,8 +8,6 @@ import {
     BlockWithTransactionData,
     CallData,
     FilterObject,
-    JSONRPCRequestPayload,
-    JSONRPCResponsePayload,
     LogEntry,
     Provider,
     RawLogEntry,
@@ -20,6 +18,7 @@ import {
     TransactionTrace,
     TxData,
 } from 'ethereum-types';
+import { ethers } from 'ethers';
 import * as _ from 'lodash';
 
 import { marshaller } from './marshaller';
@@ -44,9 +43,8 @@ export class Web3Wrapper {
      */
     public isZeroExWeb3Wrapper = true;
     public abiDecoder: AbiDecoder;
-    private _provider: Provider;
+    private _ethersProvider: ethers.providers.Web3Provider;
     private readonly _txDefaults: Partial<TxData>;
-    private _jsonRpcRequestId: number;
     /**
      * Check if an address is a valid Ethereum address
      * @param address Address to check
@@ -149,9 +147,8 @@ export class Web3Wrapper {
             (provider as any).sendAsync = (provider as any).send;
         }
         this.abiDecoder = new AbiDecoder([]);
-        this._provider = provider;
+        this._ethersProvider = new ethers.providers.Web3Provider(provider);
         this._txDefaults = txDefaults || {};
-        this._jsonRpcRequestId = 0;
     }
     /**
      * Get the contract defaults set to the Web3Wrapper instance
@@ -165,7 +162,7 @@ export class Web3Wrapper {
      * @return  Web3 provider instance
      */
     public getProvider(): Provider {
-        return this._provider;
+        return this._ethersProvider._web3Provider as Provider;
     }
     /**
      * Update the used Web3 provider
@@ -173,7 +170,7 @@ export class Web3Wrapper {
      */
     public setProvider(provider: Provider): void {
         assert.isWeb3Provider('provider', provider);
-        this._provider = provider;
+        this._ethersProvider = new ethers.providers.Web3Provider(provider);
     }
     /**
      * Check whether an address is available through the backing provider. This can be
@@ -193,7 +190,7 @@ export class Web3Wrapper {
      * @returns Ethereum node's version string
      */
     public async getNodeVersionAsync(): Promise<string> {
-        const nodeVersion = await this.sendRawPayloadAsync<string>({ method: 'web3_clientVersion' });
+        const nodeVersion = await this.sendRawPayloadAsync<string>('web3_clientVersion');
         return nodeVersion;
     }
     /**
@@ -201,9 +198,8 @@ export class Web3Wrapper {
      * @returns The network id
      */
     public async getNetworkIdAsync(): Promise<number> {
-        const networkIdStr = await this.sendRawPayloadAsync<string>({ method: 'net_version' });
-        const networkId = _.parseInt(networkIdStr);
-        return networkId;
+        const network = await this._ethersProvider.getNetwork();
+        return network.chainId;
     }
     /**
      * Retrieves the transaction receipt for a given transaction hash
@@ -212,10 +208,9 @@ export class Web3Wrapper {
      */
     public async getTransactionReceiptAsync(txHash: string): Promise<TransactionReceipt> {
         assert.isHexString('txHash', txHash);
-        const transactionReceipt = await this.sendRawPayloadAsync<TransactionReceipt>({
-            method: 'eth_getTransactionReceipt',
-            params: [txHash],
-        });
+        const transactionReceipt = await this.sendRawPayloadAsync<TransactionReceipt>('eth_getTransactionReceipt', [
+            txHash,
+        ]);
         if (!_.isNull(transactionReceipt)) {
             transactionReceipt.status = Web3Wrapper._normalizeTxReceiptStatus(transactionReceipt.status);
         }
@@ -228,10 +223,7 @@ export class Web3Wrapper {
      */
     public async getTransactionByHashAsync(txHash: string): Promise<Transaction> {
         assert.isHexString('txHash', txHash);
-        const transaction = await this.sendRawPayloadAsync<Transaction>({
-            method: 'eth_getTransactionByHash',
-            params: [txHash],
-        });
+        const transaction = await this.sendRawPayloadAsync<Transaction>('eth_getTransactionByHash', [txHash]);
         return transaction;
     }
     /**
@@ -245,14 +237,9 @@ export class Web3Wrapper {
         if (!_.isUndefined(defaultBlock)) {
             Web3Wrapper._assertBlockParam(defaultBlock);
         }
-        const marshalledDefaultBlock = marshaller.marshalBlockParam(defaultBlock);
-        const encodedOwner = marshaller.marshalAddress(owner);
-        const balanceInWei = await this.sendRawPayloadAsync<string>({
-            method: 'eth_getBalance',
-            params: [encodedOwner, marshalledDefaultBlock],
-        });
+        const balance = await this._ethersProvider.getBalance(owner, defaultBlock);
         // Rewrap in a new BigNumber
-        return new BigNumber(balanceInWei);
+        return new BigNumber(balance.toHexString());
     }
     /**
      * Check if a contract exists at a given address
@@ -279,10 +266,7 @@ export class Web3Wrapper {
         }
         const marshalledDefaultBlock = marshaller.marshalBlockParam(defaultBlock);
         const encodedAddress = marshaller.marshalAddress(address);
-        const code = await this.sendRawPayloadAsync<string>({
-            method: 'eth_getCode',
-            params: [encodedAddress, marshalledDefaultBlock],
-        });
+        const code = await this.sendRawPayloadAsync<string>('eth_getCode', [encodedAddress, marshalledDefaultBlock]);
         return code;
     }
     /**
@@ -293,10 +277,7 @@ export class Web3Wrapper {
      */
     public async getTransactionTraceAsync(txHash: string, traceParams: TraceParams): Promise<TransactionTrace> {
         assert.isHexString('txHash', txHash);
-        const trace = await this.sendRawPayloadAsync<TransactionTrace>({
-            method: 'debug_traceTransaction',
-            params: [txHash, traceParams],
-        });
+        const trace = await this.sendRawPayloadAsync<TransactionTrace>('debug_traceTransaction', [txHash, traceParams]);
         return trace;
     }
     /**
@@ -308,10 +289,7 @@ export class Web3Wrapper {
     public async signMessageAsync(address: string, message: string): Promise<string> {
         assert.isETHAddressHex('address', address);
         assert.isString('message', message); // TODO: Should this be stricter? Hex string?
-        const signData = await this.sendRawPayloadAsync<string>({
-            method: 'eth_sign',
-            params: [address, message],
-        });
+        const signData = await this.sendRawPayloadAsync<string>('eth_sign', [address, message]);
         return signData;
     }
     /**
@@ -323,10 +301,7 @@ export class Web3Wrapper {
     public async signTypedDataAsync(address: string, typedData: any): Promise<string> {
         assert.isETHAddressHex('address', address);
         assert.doesConformToSchema('typedData', typedData, schemas.eip712TypedDataSchema);
-        const signData = await this.sendRawPayloadAsync<string>({
-            method: 'eth_signTypedData',
-            params: [address, typedData],
-        });
+        const signData = await this.sendRawPayloadAsync<string>('eth_signTypedData', [address, typedData]);
         return signData;
     }
     /**
@@ -334,10 +309,7 @@ export class Web3Wrapper {
      * @returns Block number
      */
     public async getBlockNumberAsync(): Promise<number> {
-        const blockNumberHex = await this.sendRawPayloadAsync<string>({
-            method: 'eth_blockNumber',
-            params: [],
-        });
+        const blockNumberHex = await this.sendRawPayloadAsync<string>('eth_blockNumber', []);
         const blockNumber = utils.convertHexToNumberOrNull(blockNumberHex);
         return blockNumber as number;
     }
@@ -356,10 +328,7 @@ export class Web3Wrapper {
         const shouldIncludeTransactionData = false;
         const blockWithoutTransactionDataWithHexValuesOrNull = await this.sendRawPayloadAsync<
             BlockWithoutTransactionDataRPC
-        >({
-            method,
-            params: [encodedBlockParam, shouldIncludeTransactionData],
-        });
+        >(method, [encodedBlockParam, shouldIncludeTransactionData]);
         let blockWithoutTransactionDataIfExists;
         if (!_.isNull(blockWithoutTransactionDataWithHexValuesOrNull)) {
             blockWithoutTransactionDataIfExists = marshaller.unmarshalIntoBlockWithoutTransactionData(
@@ -381,10 +350,10 @@ export class Web3Wrapper {
         }
         const method = utils.isHexStrict(blockParam) ? 'eth_getBlockByHash' : 'eth_getBlockByNumber';
         const shouldIncludeTransactionData = true;
-        const blockWithTransactionDataWithHexValues = await this.sendRawPayloadAsync<BlockWithTransactionDataRPC>({
+        const blockWithTransactionDataWithHexValues = await this.sendRawPayloadAsync<BlockWithTransactionDataRPC>(
             method,
-            params: [encodedBlockParam, shouldIncludeTransactionData],
-        });
+            [encodedBlockParam, shouldIncludeTransactionData],
+        );
         const blockWithoutTransactionData = marshaller.unmarshalIntoBlockWithTransactionData(
             blockWithTransactionDataWithHexValues,
         );
@@ -408,10 +377,7 @@ export class Web3Wrapper {
      * @returns Available user addresses
      */
     public async getAvailableAddressesAsync(): Promise<string[]> {
-        const addresses = await this.sendRawPayloadAsync<string>({
-            method: 'eth_accounts',
-            params: [],
-        });
+        const addresses = await this.sendRawPayloadAsync<string>('eth_accounts', []);
         const normalizedAddresses = _.map(addresses, address => address.toLowerCase());
         return normalizedAddresses;
     }
@@ -420,7 +386,7 @@ export class Web3Wrapper {
      * @returns The snapshot id. This can be used to revert to this snapshot
      */
     public async takeSnapshotAsync(): Promise<number> {
-        const snapshotId = Number(await this.sendRawPayloadAsync<string>({ method: 'evm_snapshot', params: [] }));
+        const snapshotId = Number(await this.sendRawPayloadAsync<string>('evm_snapshot', []));
         return snapshotId;
     }
     /**
@@ -430,14 +396,14 @@ export class Web3Wrapper {
      */
     public async revertSnapshotAsync(snapshotId: number): Promise<boolean> {
         assert.isNumber('snapshotId', snapshotId);
-        const didRevert = await this.sendRawPayloadAsync<boolean>({ method: 'evm_revert', params: [snapshotId] });
+        const didRevert = await this.sendRawPayloadAsync<boolean>('evm_revert', [snapshotId]);
         return didRevert;
     }
     /**
      * Mine a block on a TestRPC/Ganache local node
      */
     public async mineBlockAsync(): Promise<void> {
-        await this.sendRawPayloadAsync<string>({ method: 'evm_mine', params: [] });
+        await this.sendRawPayloadAsync<string>('evm_mine', []);
     }
     /**
      * Increase the next blocks timestamp on TestRPC/Ganache or Geth local node.
@@ -449,9 +415,9 @@ export class Web3Wrapper {
         // Detect Geth vs. Ganache and use appropriate endpoint.
         const version = await this.getNodeVersionAsync();
         if (_.includes(version, uniqueVersionIds.geth)) {
-            return this.sendRawPayloadAsync<number>({ method: 'debug_increaseTime', params: [timeDelta] });
+            return this.sendRawPayloadAsync<number>('debug_increaseTime', [timeDelta]);
         } else if (_.includes(version, uniqueVersionIds.ganache)) {
-            return this.sendRawPayloadAsync<number>({ method: 'evm_increaseTime', params: [timeDelta] });
+            return this.sendRawPayloadAsync<number>('evm_increaseTime', [timeDelta]);
         } else {
             throw new Error(`Unknown client version: ${version}`);
         }
@@ -481,11 +447,7 @@ export class Web3Wrapper {
             fromBlock,
             toBlock,
         };
-        const payload = {
-            method: 'eth_getLogs',
-            params: [serializedFilter],
-        };
-        const rawLogs = await this.sendRawPayloadAsync<RawLogEntry[]>(payload);
+        const rawLogs = await this.sendRawPayloadAsync<RawLogEntry[]>('eth_getLogs', [serializedFilter]);
         const formattedLogs = _.map(rawLogs, marshaller.unmarshalLog.bind(marshaller));
         return formattedLogs;
     }
@@ -501,7 +463,7 @@ export class Web3Wrapper {
             schemas.jsNumber,
         ]);
         const txDataHex = marshaller.marshalTxData(txData);
-        const gasHex = await this.sendRawPayloadAsync<string>({ method: 'eth_estimateGas', params: [txDataHex] });
+        const gasHex = await this.sendRawPayloadAsync<string>('eth_estimateGas', [txDataHex]);
         const gas = utils.convertHexToNumber(gasHex);
         return gas;
     }
@@ -522,10 +484,7 @@ export class Web3Wrapper {
         }
         const marshalledDefaultBlock = marshaller.marshalBlockParam(defaultBlock);
         const callDataHex = marshaller.marshalCallData(callData);
-        const rawCallResult = await this.sendRawPayloadAsync<string>({
-            method: 'eth_call',
-            params: [callDataHex, marshalledDefaultBlock],
-        });
+        const rawCallResult = await this.sendRawPayloadAsync<string>('eth_call', [callDataHex, marshalledDefaultBlock]);
         if (rawCallResult === '0x') {
             throw new Error('Contract call failed (returned null)');
         }
@@ -543,7 +502,7 @@ export class Web3Wrapper {
             schemas.jsNumber,
         ]);
         const txDataHex = marshaller.marshalTxData(txData);
-        const txHash = await this.sendRawPayloadAsync<string>({ method: 'eth_sendTransaction', params: [txDataHex] });
+        const txHash = await this.sendRawPayloadAsync<string>('eth_sendTransaction', [txDataHex]);
         return txHash;
     }
     /**
@@ -653,26 +612,15 @@ export class Web3Wrapper {
      */
     public async setHeadAsync(blockNumber: number): Promise<void> {
         assert.isNumber('blockNumber', blockNumber);
-        await this.sendRawPayloadAsync<void>({ method: 'debug_setHead', params: [utils.numberToHex(blockNumber)] });
+        await this.sendRawPayloadAsync<void>('debug_setHead', [utils.numberToHex(blockNumber)]);
     }
     /**
      * Sends a raw Ethereum JSON RPC payload and returns the response's `result` key
      * @param payload A partial JSON RPC payload. No need to include version, id, params (if none needed)
      * @return The contents nested under the result key of the response body
      */
-    public async sendRawPayloadAsync<A>(payload: Partial<JSONRPCRequestPayload>): Promise<A> {
-        const sendAsync = this._provider.sendAsync.bind(this._provider);
-        const payloadWithDefaults = {
-            id: this._jsonRpcRequestId++,
-            params: [],
-            jsonrpc: '2.0',
-            ...payload,
-        };
-        const response = await promisify<JSONRPCResponsePayload>(sendAsync)(payloadWithDefaults);
-        if (response.error) {
-            throw new Error(response.error.message);
-        }
-        const result = response.result;
+    public async sendRawPayloadAsync<A>(method: string, params: any[] = []): Promise<A> {
+        const result = await this._ethersProvider.send(method, params);
         return result;
     }
     /**

@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import { BlockParamLiteral, JSONRPCErrorCallback, JSONRPCRequestPayload } from 'ethereum-types';
+import * as ethers from 'ethers';
 import * as Ganache from 'ganache-core';
 import * as _ from 'lodash';
 import 'mocha';
@@ -62,8 +63,14 @@ describe('Web3Wrapper tests', () => {
         it('gets the users balance in wei', async () => {
             const secondAccount = addresses[1];
             const balanceInWei = await web3Wrapper.getBalanceInWeiAsync(secondAccount);
-            const tenEthInWei = 100000000000000000000;
-            expect(balanceInWei).to.be.bignumber.equal(tenEthInWei);
+            const hundredEthInWei = 100_000_000_000_000_000_000;
+            expect(balanceInWei).to.be.bignumber.equal(hundredEthInWei);
+        });
+        it('gets the users balance in wei at the genesis block', async () => {
+            const secondAccount = addresses[1];
+            const balanceInWei = await web3Wrapper.getBalanceInWeiAsync(secondAccount, 0);
+            const hundredEthInWei = 100_000_000_000_000_000_000;
+            expect(balanceInWei).to.be.bignumber.equal(hundredEthInWei);
         });
         it('should throw if supplied owner not an Ethereum address hex string', async () => {
             const invalidEthAddress = 'deadbeef';
@@ -83,7 +90,9 @@ describe('Web3Wrapper tests', () => {
             const signer = addresses[1];
             const fakeProvider = {
                 async sendAsync(payload: JSONRPCRequestPayload, callback: JSONRPCErrorCallback): Promise<void> {
-                    callback(new Error('User denied message signature'));
+                    if (payload.method === 'eth_sign') {
+                        callback(new Error('User denied message signature'));
+                    }
                 },
             };
             const errorWeb3Wrapper = new Web3Wrapper(fakeProvider);

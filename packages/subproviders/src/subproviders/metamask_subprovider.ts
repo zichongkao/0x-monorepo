@@ -88,10 +88,10 @@ export class MetamaskSubprovider extends Subprovider {
                     // Source: https://github.com/MetaMask/metamask-extension/blob/c49d854b55b3efd34c7fd0414b76f7feaa2eec7c/app/scripts/metamask-controller.js#L1262
                     // and expects message to be serialised as JSON
                     const messageJSON = JSON.stringify(message);
-                    const signature = await this._web3Wrapper.sendRawPayloadAsync<string>({
-                        method: 'eth_signTypedData_v3',
-                        params: [address, messageJSON],
-                    });
+                    const signature = await this._web3Wrapper.sendRawPayloadAsync<string>('eth_signTypedData_v3', [
+                        address,
+                        messageJSON,
+                    ]);
                     signature ? end(null, signature) : end(new Error('Error performing eth_signTypedData'), null);
                 } catch (err) {
                     end(err);
