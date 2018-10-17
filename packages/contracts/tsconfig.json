@@ -28,6 +28,7 @@
         "./generated-artifacts/MixinAuthorizable.json",
         "./generated-artifacts/MultiSigWallet.json",
         "./generated-artifacts/MultiSigWalletWithTimeLock.json",
+        "./generated-artifacts/OrderMatcher.json",
         "./generated-artifacts/OrderValidator.json",
         "./generated-artifacts/ReentrantERC20Token.json",
         "./generated-artifacts/TestAssetProxyDispatcher.json",
